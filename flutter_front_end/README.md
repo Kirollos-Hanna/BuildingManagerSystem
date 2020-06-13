@@ -1,4 +1,4 @@
-# flutter_project
+# flutter_front_end
 
 A new Flutter project.
 
@@ -14,9 +14,3 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-
-## TODOS:
-
-- Users can register as home owners or renters
-	- when a user presses on the registration button, a form will show that takes him/her through the 
-	process of data input.

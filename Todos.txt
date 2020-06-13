@@ -1,0 +1,2 @@
+- Users can register as home owners or renters
+-
