@@ -6,15 +6,18 @@ class DatabaseService {
   DatabaseService({ this.uid });
 
   // collection reference
-  final CollectionReference roleCollection = Firestore.instance.collection('roles');
+  final CollectionReference infoCollection = Firestore.instance.collection('additionalinfo');
 
-  Future updateRole(String role) async {
-    return await roleCollection.document(uid).setData({
-      'role': role
+  Future updateRole(String role, String phoneNumber, String floorNumber, String apartmentNumber) async {
+    return await infoCollection.document(uid).setData({
+      'role': role,
+      'phone_number': phoneNumber,
+      'floor_number': floorNumber,
+      'apartment_number': apartmentNumber,
     });
   }
 
   Stream<QuerySnapshot> get role {
-    return roleCollection.snapshots();
+    return infoCollection.snapshots();
   }
 }

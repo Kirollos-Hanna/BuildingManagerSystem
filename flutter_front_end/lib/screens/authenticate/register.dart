@@ -14,8 +14,6 @@ class Register extends StatefulWidget {
 
 class _RegisterState extends State<Register> {
 
-  // TODO add radiobuttons that check whether the user wants to be a property owner or a renter
-
   final AuthService _auth = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
