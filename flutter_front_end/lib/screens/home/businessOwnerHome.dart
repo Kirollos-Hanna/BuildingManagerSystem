@@ -6,7 +6,7 @@ import 'package:flutter_front_end/services/database.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class RenterHome extends StatelessWidget {
+class BusinessOwnerHome extends StatelessWidget {
   // TODO show this page only after the user has decided their role
 
   final AuthService _auth = AuthService();
@@ -31,7 +31,7 @@ class RenterHome extends StatelessWidget {
             ),
           ],
         ),
-        body: Text("Renter Home"),
+        body: Text("Business Owner Home"),
       ),
     );
   }

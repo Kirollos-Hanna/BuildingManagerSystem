@@ -7,15 +7,50 @@ class DatabaseService {
 
   // collection reference
   final CollectionReference infoCollection = Firestore.instance.collection('additionalinfo');
+  final CollectionReference billCollection = Firestore.instance.collection('bills');
+  final CollectionReference reportCollection = Firestore.instance.collection('reports');
+  final CollectionReference notificationCollection = Firestore.instance.collection('notifications');
 
-  Future updateRole(String role, String phoneNumber, String floorNumber, String apartmentNumber) async {
+  Future updateRole(String name, String role, String phoneNumber, String floorNumber, String apartmentNumber, bool occupied) async {
     return await infoCollection.document(uid).setData({
+      'name': name,
       'role': role,
       'phone_number': phoneNumber,
       'floor_number': floorNumber,
       'apartment_number': apartmentNumber,
+      'occupied': occupied,
     });
   }
+
+//  Future updateBill(String status, String generationDate, int amountDue) async {
+//    return await billCollection.document(uid).setData({
+//      'status': status, // values = "paid", "unpaid", "overdue"
+//      'generation_date': generationDate,
+//      // Format of generation date
+////    DateTime currentDate = new DateTime.now();
+////    String date = currentDate.year.toString() + "-" + currentDate.month.toString() + "-" + currentDate.day.toString();
+////    print(date[5]);
+//      'amount_due': amountDue
+//    });
+//  }
+//
+//  Future updateReport(Admin admin, Customer customer, Bill bill, bool paidBill) async {
+//    return await reportCollection.document(uid).setData({
+//      'admin': admin,
+//      'customer': customer,
+//      'bill': bill,
+//      'bill_paid': paidBill
+//    });
+//  }
+//
+//  Future updateNotification(String message, String receiver, String sender, bool seen) async {
+//    return await notificationCollection.document(uid).setData({
+//      'message': message,
+//      'sender': sender,
+//      'receiver': receiver,
+//      'seen': seen
+//    });
+//  }
 
   Stream<QuerySnapshot> get role {
     return infoCollection.snapshots();

@@ -13,10 +13,12 @@ class Role extends StatefulWidget {
 class _RoleState extends State<Role> {
 //  final AuthService _auth = AuthService();
 
+  String name = "";
   String role = "Renter";
   String phoneNumber = "";
   String apartmentNumber = "";
   String floorNumber = "";
+  bool occupied = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,19 @@ class _RoleState extends State<Role> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            Text("Write your name"),
+            SizedBox(height: 20.0,),
+            TextFormField(
+              decoration: InputDecoration(
+                  hintText: "Name"
+              ),
+              validator: (val) => val == null ? 'Enter your Name' : null,
+              onChanged: (val) {
+                setState(() {
+                  name = val;
+                });
+              },
+            ),
             Text("Choose your role"),
             ListTile(
               title: const Text('Business Owner'),
@@ -70,13 +85,22 @@ class _RoleState extends State<Role> {
                 },
               ),
             ),
+            CheckboxListTile(
+              title: Text("Are you occupying your apartment?"),
+              value: occupied,
+              onChanged: (newValue) {
+                setState(() {
+                  occupied = newValue;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox
+            ),
             Text("Phone Number"),
             SizedBox(height: 20.0,),
             TextFormField(
               decoration: InputDecoration(
                   hintText: "Phone Number"
               ),
-              obscureText: true,
               validator: (val) => val.length < 10 ? 'Enter a valid phone number' : null,
               onChanged: (val) {
                 setState(() {
@@ -90,7 +114,6 @@ class _RoleState extends State<Role> {
               decoration: InputDecoration(
                   hintText: "Floor Number"
               ),
-              obscureText: true,
               validator: (val) => val == null ? 'Enter a floor number' : null,
               onChanged: (val) {
                 setState(() {
@@ -103,7 +126,6 @@ class _RoleState extends State<Role> {
               decoration: InputDecoration(
                   hintText: "Apartment Number"
               ),
-              obscureText: true,
               validator: (val) => val == null ? 'Enter an apartment number' : null,
               onChanged: (val) {
                 setState(() {
@@ -114,7 +136,7 @@ class _RoleState extends State<Role> {
             RaisedButton(
               child: Text("Submit"),
               onPressed: () {
-                DatabaseService(uid: user.uid).updateRole(role, phoneNumber, floorNumber, apartmentNumber);
+                DatabaseService(uid: user.uid).updateRole(name, role, phoneNumber, floorNumber, apartmentNumber, occupied);
               },
             )
           ],

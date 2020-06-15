@@ -36,7 +36,7 @@ class AuthService {
       FirebaseUser user = result.user;
 
       // create a new document for the user with the uid
-      await DatabaseService(uid: user.uid).updateRole("undecided", "0", "0", "0");
+      await DatabaseService(uid: user.uid).updateRole("", "undecided", "0", "0", "0", false);
 
       return _userFromFirebaseUser(user);
     } catch(e){
