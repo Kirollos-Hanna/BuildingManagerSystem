@@ -16,21 +16,19 @@ class HomeWrapper extends StatelessWidget {
 
     String currentRole = '';
 
-
     for(var role in role.documents){
       if(role.documentID == user.uid){
         currentRole = role.data['role'];
       }
     }
 
-    // return either home or authenticate widget
     if(currentRole == "undecided"){
       return Role();
     } else if (currentRole == "Resident"){
       return ResidentHome();
     } else if (currentRole == "Business Owner"){
       return BusinessOwnerHome();
-    } else{
+    } else  if (currentRole == "Building Manager"){
       return BuildingManagerHome();
     }
   }

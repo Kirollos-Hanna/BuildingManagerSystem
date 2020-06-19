@@ -16,9 +16,15 @@ class _RoleState extends State<Role> {
   String name = "";
   String role = "Renter";
   String phoneNumber = "";
+  bool occupied = false;
+
+  String country = "";
+  String governorate = "";
+  String district = "";
+  String street = "";
+  String buildingNumber = "";
   String apartmentNumber = "";
   String floorNumber = "";
-  bool occupied = false;
 
   @override
   Widget build(BuildContext context) {
@@ -108,35 +114,136 @@ class _RoleState extends State<Role> {
                 });
               },
             ),
-            Text("Floor and Apartment Number"),
-            SizedBox(height: 20.0,),
-            TextFormField(
-              decoration: InputDecoration(
-                  hintText: "Floor Number"
-              ),
-              validator: (val) => val == null ? 'Enter a floor number' : null,
-              onChanged: (val) {
-                setState(() {
-                  floorNumber = val;
-                });
-              },
+            Text("Floor, Apartment Number and Address"),
+            Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  width: 100,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Floor Number"
+                    ),
+                    validator: (val) => val == null ? 'Enter a floor number' : null,
+                    onChanged: (val) {
+                      setState(() {
+                        floorNumber = val.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  width: 100,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Apartment Number"
+                    ),
+                    validator: (val) => val == null ? 'Enter an apartment number' : null,
+                    onChanged: (val) {
+                      setState(() {
+                        apartmentNumber = val.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  width: 100,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Building Number"
+                    ),
+                    validator: (val) => val == null ? 'Enter a building number' : null,
+                    onChanged: (val) {
+                      setState(() {
+                        buildingNumber = val.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 20.0,),
-            TextFormField(
-              decoration: InputDecoration(
-                  hintText: "Apartment Number"
+        Flex(
+          direction: Axis.horizontal,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(5.0),
+              width: 100,
+              child: TextFormField(
+                decoration: InputDecoration(
+                    hintText: "Street name"
+                ),
+                validator: (val) => val == null ? 'Enter a street name' : null,
+                onChanged: (val) {
+                  setState(() {
+                    street = val.toLowerCase();
+                  });
+                },
               ),
-              validator: (val) => val == null ? 'Enter an apartment number' : null,
-              onChanged: (val) {
-                setState(() {
-                  apartmentNumber = val;
-                });
-              },
+            ),
+
+            Container(
+              padding: EdgeInsets.all(5.0),
+              width: 100,
+              child: TextFormField(
+                decoration: InputDecoration(
+                    hintText: "district"
+                ),
+                validator: (val) => val == null ? 'Enter a district name' : null,
+                onChanged: (val) {
+                  setState(() {
+                    district = val.toLowerCase();
+                  });
+                },
+              ),
+            ),
+            ],
+        ),
+            Flex(
+              direction: Axis.horizontal,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  width: 100,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Governorate"
+                    ),
+                    validator: (val) => val == null ? 'Enter a governorate' : null,
+                    onChanged: (val) {
+                      setState(() {
+                        governorate = val.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.all(5.0),
+                  width: 100,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Country"
+                    ),
+                    validator: (val) => val == null ? 'Enter a country' : null,
+                    onChanged: (val) {
+                      setState(() {
+                        country = val.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+              ],
             ),
             RaisedButton(
               child: Text("Submit"),
               onPressed: () {
-                DatabaseService(uid: user.uid).updateRole(name, role, phoneNumber, floorNumber, apartmentNumber, occupied);
+                var address = [apartmentNumber, floorNumber, buildingNumber, street, district, governorate, country];
+                DatabaseService(uid: user.uid).updateRole(name, role, phoneNumber, floorNumber, apartmentNumber, occupied, address);
               },
             )
           ],

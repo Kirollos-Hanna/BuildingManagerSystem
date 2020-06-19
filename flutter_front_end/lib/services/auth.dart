@@ -20,7 +20,7 @@ class AuthService {
 // sign in using email and password
   Future loginWithEmailAndPassword(String email, String password) async {
     try {
-      AuthResult result = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      AuthResult result = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
       FirebaseUser user = result.user;
       return _userFromFirebaseUser(user);
     } catch(e){
@@ -36,7 +36,7 @@ class AuthService {
       FirebaseUser user = result.user;
 
       // create a new document for the user with the uid
-      await DatabaseService(uid: user.uid).updateRole("", "undecided", "0", "0", "0", false);
+      await DatabaseService(uid: user.uid).updateRole("", "undecided", "0", "0", "0", false, []);
 
       return _userFromFirebaseUser(user);
     } catch(e){

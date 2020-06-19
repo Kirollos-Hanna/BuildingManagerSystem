@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_front_end/models/Bill.dart';
 
 class DatabaseService {
 
@@ -11,7 +12,7 @@ class DatabaseService {
   final CollectionReference reportCollection = Firestore.instance.collection('reports');
   final CollectionReference notificationCollection = Firestore.instance.collection('notifications');
 
-  Future updateRole(String name, String role, String phoneNumber, String floorNumber, String apartmentNumber, bool occupied) async {
+  Future updateRole(String name, String role, String phoneNumber, String floorNumber, String apartmentNumber, bool occupied, var address) async {
     return await infoCollection.document(uid).setData({
       'name': name,
       'role': role,
@@ -19,21 +20,45 @@ class DatabaseService {
       'floor_number': floorNumber,
       'apartment_number': apartmentNumber,
       'occupied': occupied,
+      'address': address,
     });
   }
 
-//  Future updateBill(String status, String generationDate, int amountDue) async {
-//    return await billCollection.document(uid).setData({
-//      'status': status, // values = "paid", "unpaid", "overdue"
-//      'generation_date': generationDate,
-//      // Format of generation date
-////    DateTime currentDate = new DateTime.now();
-////    String date = currentDate.year.toString() + "-" + currentDate.month.toString() + "-" + currentDate.day.toString();
-////    print(date[5]);
-//      'amount_due': amountDue
+  Map<String, dynamic> billData(Bill inputBill) {
+    Map<String, dynamic> bill = <String, dynamic>{
+      'status': inputBill.status,
+      'generationDate': inputBill.generationDate,
+      'type': inputBill.type,
+      'amountDue': inputBill.amountDue,
+    };
+    return bill;
+  }
+
+  Future updateBill(Bill bill) async {
+    List<dynamic> bills = [billData(bill)];
+
+//    billCollection.document(uid).get().then((value) {
+//      List<dynamic> values = value.data['bills'];
+//      bills.add(values.sublist(0, values.length));
+//      print(bills);
 //    });
-//  }
-//
+
+    return await billCollection.document(uid).setData({
+      'bills': bills,
+      });
+    print(bill.amountDue);
+
+    return await billCollection.document(uid).setData(await billData(bill));
+  }
+
+  Future getBillData() async {
+    return billCollection.document(uid).get();
+  }
+
+  List<Bill> returnBills(DocumentSnapshot snapshot) {
+    return snapshot.data['bills'];
+  }
+
 //  Future updateReport(Admin admin, Customer customer, Bill bill, bool paidBill) async {
 //    return await reportCollection.document(uid).setData({
 //      'admin': admin,
@@ -54,5 +79,9 @@ class DatabaseService {
 
   Stream<QuerySnapshot> get role {
     return infoCollection.snapshots();
+  }
+
+  Stream<DocumentSnapshot> get bills {
+    return billCollection.document(uid).snapshots();
   }
 }
