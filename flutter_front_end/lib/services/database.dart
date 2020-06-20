@@ -24,41 +24,6 @@ class DatabaseService {
     });
   }
 
-  Map<String, dynamic> billData(Bill inputBill) {
-    Map<String, dynamic> bill = <String, dynamic>{
-      'status': inputBill.status,
-      'generationDate': inputBill.generationDate,
-      'type': inputBill.type,
-      'amountDue': inputBill.amountDue,
-    };
-    return bill;
-  }
-
-  Future updateBill(Bill bill) async {
-    List<dynamic> bills = [billData(bill)];
-
-//    billCollection.document(uid).get().then((value) {
-//      List<dynamic> values = value.data['bills'];
-//      bills.add(values.sublist(0, values.length));
-//      print(bills);
-//    });
-
-    return await billCollection.document(uid).setData({
-      'bills': bills,
-      });
-    print(bill.amountDue);
-
-    return await billCollection.document(uid).setData(await billData(bill));
-  }
-
-  Future getBillData() async {
-    return billCollection.document(uid).get();
-  }
-
-  List<Bill> returnBills(DocumentSnapshot snapshot) {
-    return snapshot.data['bills'];
-  }
-
 //  Future updateReport(Admin admin, Customer customer, Bill bill, bool paidBill) async {
 //    return await reportCollection.document(uid).setData({
 //      'admin': admin,
@@ -79,9 +44,5 @@ class DatabaseService {
 
   Stream<QuerySnapshot> get role {
     return infoCollection.snapshots();
-  }
-
-  Stream<DocumentSnapshot> get bills {
-    return billCollection.document(uid).snapshots();
   }
 }

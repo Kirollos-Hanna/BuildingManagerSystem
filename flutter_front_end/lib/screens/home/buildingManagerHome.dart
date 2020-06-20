@@ -5,6 +5,7 @@ import 'package:flutter_front_end/models/User.dart';
 import 'package:flutter_front_end/screens/homeWrapper.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:flutter_front_end/services/database.dart';
+import 'package:flutter_front_end/widgets/billWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -44,9 +45,7 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
         ),
         body: Column(
           children: <Widget>[
-            Form(
-//              key: _formKey,
-              child: Column(
+              Column(
                 children: <Widget>[
                   SizedBox(height: 20.0),
                   TextFormField(
@@ -80,23 +79,46 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                       "Submit",
                       style: TextStyle(color: Colors.white),
                     ),
-                    onPressed: () async {
+                    onPressed: ()  {
                         DateTime currentDate = new DateTime.now();
                         String date = currentDate.year.toString() + "-" + currentDate.month.toString() + "-" + currentDate.day.toString();
-                        Bill bill = new Bill(status: 'unpaid', generationDate: date, type: billType, amountDue: price);
-                        // get bills in database
-                        print(await DatabaseService(uid: user.uid).getBillData());
-//                            .then((value) {
-//                          List<dynamic> values = value.data['bills'];
-//                          print(values);
-//                          print("values");
-//                        });
-                      DatabaseService(uid: user.uid).updateBill(bill);
+
+                        Firestore.instance.collection('bills/es5oYeeSI9gWFOepMqhJ5y1kY6k1/bills')
+                            .add({"status": 'unpaid', "generationDate": date, "type": billType, "amountDue": price});
                     },
                   ),
+                  SizedBox(
+                    height: 500,
+                child: StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('bills/es5oYeeSI9gWFOepMqhJ5y1kY6k1/bills')
+                          .snapshots(),
+                      builder: (ctx, streamSnapshot) {
+
+                        final documents = streamSnapshot.data.documents;
+
+                        if(streamSnapshot.connectionState == ConnectionState.waiting){
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        return ListView.builder(
+                            shrinkWrap: true,
+                          itemCount: documents.length,
+                          itemBuilder: (ctx, index) => Container(
+//                            child: Text(documents[index]['amountDue'].toString()),
+                            child: BillWidget(
+                                documents[index]['amountDue'].toString(),
+                                documents[index]['status'],
+                                documents[index]['generationDate'],
+                                documents[index]['type']),
+                          )
+                        );
+                      }
+                    ),
+              ),
                 ],
               ),
-            ),
           ],
         ),
     );
