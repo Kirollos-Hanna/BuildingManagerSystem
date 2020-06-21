@@ -20,9 +20,14 @@ samples, guidance on mobile development, and a full API reference.
 - Users can register as home owners or renters **DONE**
 	- when a user presses on the registration button, a form will show that takes him/her through the 
 	process of data input.**DONE**
-- Building managers can give bills to certain owners
+- Building managers can give bills to owners**DONE**
 - When owners pay their bills, a report will show in front of managers with information related to the owner and the bill which can then be confirmed after review
-- There are shared bills that must be paid by multiple owners (ex. Elevator bill)
+	- Owners can pay their bills (use a checkbox for now, payment system is in future versions)
+	- Show a report in front of managers for the payed bills by the owners
+	- Managers can verify those reports
+	- Managers can cancel those reports
+		- Owners will still have this bill to pay in their accounts
+- Bills must be paid by all registered users in the same building
 	- Owners on the ground floor are exempt from elevator bills
 	- Business owners pay twice more than property owners for this bill
 	- Identify how much an owner must pay based on their info
