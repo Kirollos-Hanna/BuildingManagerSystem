@@ -16,16 +16,21 @@ class BuildingManagerHome extends StatefulWidget {
   _BuildingManagerHomeState createState() => _BuildingManagerHomeState();
 }
 
+
 class _BuildingManagerHomeState extends State<BuildingManagerHome> {
   final AuthService _auth = AuthService();
 
   int price = 0;
   String billType = "";
 
+  String dropdownString = "Water";
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
     final _formKey = GlobalKey<FormState>();
+
+    // TODO make the manager specify the number of residents in the building along with the number of business owners
 
     return  Scaffold(
         backgroundColor: Colors.brown[50],
@@ -43,22 +48,32 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
             ),
           ],
         ),
-        body: Column(
-          children: <Widget>[
-              Column(
+        body: SingleChildScrollView(
+          child: Column(
                 children: <Widget>[
                   SizedBox(height: 20.0),
-                  TextFormField(
-                    validator: (val) => val.isEmpty ? 'Enter the bill type' : null,
-                    decoration: InputDecoration(
-                        hintText: "Bill type"
-                    ),
-                    onChanged: (val) {
-                      setState(() {
-                        billType = val;
-                      });
-                    },
-                  ),
+          DropdownButton<String>(
+            value: dropdownString,
+            icon: Icon(Icons.arrow_downward),
+            iconSize: 24,
+            elevation: 16,
+            underline: Container(
+              height: 2,
+              color: Colors.black,
+            ),
+            onChanged: (String newValue) {
+              setState(() {
+                dropdownString = newValue;
+                billType = newValue;
+              });
+            },
+            items: <String>["Water", "Electricity", "Elevator", "Salaries", "Cleaning", "Other"]
+                .map<DropdownMenuItem<String>> ((String val) {
+                  return DropdownMenuItem<String> (
+                    value: val,
+                    child: Text(val),
+                  );
+            }).toList(), ),
                   SizedBox(height: 20.0,),
 
                   TextFormField(
@@ -83,6 +98,7 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                         DateTime currentDate = new DateTime.now();
                         String date = currentDate.year.toString() + "-" + currentDate.month.toString() + "-" + currentDate.day.toString();
 
+                        // TODO change the uid to a dynamic one
                         Firestore.instance.collection('bills/es5oYeeSI9gWFOepMqhJ5y1kY6k1/bills')
                             .add({"status": 'unpaid', "generationDate": date, "type": billType, "amountDue": price});
                     },
@@ -119,7 +135,6 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
               ),
                 ],
               ),
-          ],
         ),
     );
   }

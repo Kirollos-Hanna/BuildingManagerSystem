@@ -13,6 +13,7 @@ class DatabaseService {
   final CollectionReference notificationCollection = Firestore.instance.collection('notifications');
 
   Future updateRole(String name, String role, String phoneNumber, String floorNumber, String apartmentNumber, bool occupied, var address) async {
+
     return await infoCollection.document(uid).setData({
       'name': name,
       'role': role,

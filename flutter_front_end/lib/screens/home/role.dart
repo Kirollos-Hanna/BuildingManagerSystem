@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/models/User.dart';
 import 'package:flutter_front_end/services/auth.dart';
@@ -26,10 +27,11 @@ class _RoleState extends State<Role> {
   String apartmentNumber = "";
   String floorNumber = "";
 
+  String error = "";
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
-
 
     return Scaffold(
       backgroundColor: Colors.brown[50],
@@ -124,12 +126,12 @@ class _RoleState extends State<Role> {
                   width: 100,
                   child: TextFormField(
                     decoration: InputDecoration(
-                        hintText: "Floor Number"
+                        hintText: "Apartment Number"
                     ),
-                    validator: (val) => val == null ? 'Enter a floor number' : null,
+                    validator: (val) => val == null ? 'Enter an apartment number' : null,
                     onChanged: (val) {
                       setState(() {
-                        floorNumber = val.toLowerCase();
+                        apartmentNumber = val.toLowerCase();
                       });
                     },
                   ),
@@ -139,12 +141,12 @@ class _RoleState extends State<Role> {
                   width: 100,
                   child: TextFormField(
                     decoration: InputDecoration(
-                        hintText: "Apartment Number"
+                        hintText: "Floor Number"
                     ),
-                    validator: (val) => val == null ? 'Enter an apartment number' : null,
+                    validator: (val) => val == null ? 'Enter a floor number' : null,
                     onChanged: (val) {
                       setState(() {
-                        apartmentNumber = val.toLowerCase();
+                        floorNumber = val.toLowerCase();
                       });
                     },
                   ),
@@ -239,13 +241,68 @@ class _RoleState extends State<Role> {
                 ),
               ],
             ),
+            SizedBox(height: 12.0,),
+            Text(
+              error,
+              style: TextStyle(color: Colors.red, fontSize: 14.0),),
             RaisedButton(
               child: Text("Submit"),
               onPressed: () {
-                var address = [apartmentNumber, floorNumber, buildingNumber, street, district, governorate, country];
-                DatabaseService(uid: user.uid).updateRole(name, role, phoneNumber, floorNumber, apartmentNumber, occupied, address);
-              },
-            )
+                bool validate = false;
+
+                var address = [
+                  apartmentNumber.trim(),
+                  floorNumber.trim(),
+                  buildingNumber.trim(),
+                  street.trim(),
+                  district.trim(),
+                  governorate.trim(),
+                  country.trim()
+                ];
+                var buildingAddress = address.sublist(2,address.length);
+
+                Firestore.instance.collection('additionalinfo')
+                    .getDocuments()
+                    .then((value) {
+
+                  value.documents.forEach((element) {
+                    print(element['role']);
+                    if(element['address'].length >= 2){
+                      var otherBuildingAddress = element['address'].sublist(2,element['address'].length);
+
+                      String oBA = otherBuildingAddress.toString();
+                      String bA = buildingAddress.toString();
+
+                      // if role and address(up to building number) == other role and address refuse submission
+                      if(oBA == bA && role == "Building Manager" && role == element['role']){
+                        print("do not validate manager");
+                        setState(() {
+                          error = "Another user is registered as a manager in this building";
+                        });
+                      } else{
+                        // if address(whole address) == another address refuse submission
+                        if(element['address'].toString() == address.toString()){
+                          print("do not validate");
+                          setState(() {
+                            error = "Another user is registered with this address";
+                          });
+                        } else {
+                          setState(() {
+                            error = "";
+                          });
+                          print("validate");
+                          validate = true;
+                        }
+                      }
+                    }
+
+                    if(validate) {
+                      DatabaseService(uid: user.uid).updateRole(name, role, phoneNumber, floorNumber, apartmentNumber, occupied, address);
+                    }
+                  });
+                });
+                },
+            ),
           ],
         ),
       ),

@@ -16,20 +16,26 @@ class HomeWrapper extends StatelessWidget {
 
     String currentRole = '';
 
-    for(var role in role.documents){
-      if(role.documentID == user.uid){
-        currentRole = role.data['role'];
+    if(role != null) {
+      for (var role in role.documents) {
+        if (role.documentID == user.uid) {
+          currentRole = role.data['role'];
+        }
       }
     }
 
-    if(currentRole == "undecided"){
-      return Role();
+    if(currentRole == "Building Manager"){
+      return BuildingManagerHome();
     } else if (currentRole == "Resident"){
       return ResidentHome();
     } else if (currentRole == "Business Owner"){
       return BusinessOwnerHome();
-    } else{
-      return BuildingManagerHome();
+    } else if (currentRole == "undecided"){
+      return Role();
+    } else {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
     }
   }
 }
