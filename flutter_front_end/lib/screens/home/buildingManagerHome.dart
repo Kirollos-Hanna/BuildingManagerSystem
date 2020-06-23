@@ -105,33 +105,35 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                   ),
                   SizedBox(
                     height: 500,
-                child: StreamBuilder(
-                      stream: Firestore.instance
-                          .collection('bills/es5oYeeSI9gWFOepMqhJ5y1kY6k1/bills')
-                          .snapshots(),
-                      builder: (ctx, streamSnapshot) {
-
-                        final documents = streamSnapshot.data.documents;
-
-                        if(streamSnapshot.connectionState == ConnectionState.waiting){
-                          return Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        }
-                        return ListView.builder(
-                            shrinkWrap: true,
-                          itemCount: documents.length,
-                          itemBuilder: (ctx, index) => Container(
-//                            child: Text(documents[index]['amountDue'].toString()),
-                            child: BillWidget(
-                                documents[index]['amountDue'].toString(),
-                                documents[index]['status'],
-                                documents[index]['generationDate'],
-                                documents[index]['type']),
-                          )
-                        );
-                      }
-                    ),
+//                child: StreamBuilder(
+//                      stream: Firestore.instance
+//                          .collection('bills/es5oYeeSI9gWFOepMqhJ5y1kY6k1/bills')
+//                          .snapshots(),
+//                      builder: (ctx, streamSnapshot) {
+//
+//                        final documents = streamSnapshot.data.documents;
+//
+//                        if(streamSnapshot.connectionState == ConnectionState.waiting){
+//                          return Center(
+//                            child: CircularProgressIndicator(),
+//                          );
+//                        }
+//                        return ListView.builder(
+//                            shrinkWrap: true,
+//                          itemCount: documents.length,
+//                          itemBuilder: (ctx, index) => Container(
+////                            child: Text(documents[index]['amountDue'].toString()),
+//                            child:
+//                              // TODO fix the billwidget here if it works in residentHome
+//                            BillWidget(
+//                                documents[index]['amountDue'].toString(),
+//                                documents[index]['status'],
+//                                documents[index]['generationDate'],
+//                                documents[index]['type']),
+//                          )
+//                        );
+//                      }
+//                    ),
               ),
                 ],
               ),

@@ -6,15 +6,19 @@ class BillWidget extends StatefulWidget{
   final String status;
   final String generationDate;
   final String type;
+  Function updatePaidBills;
 
-  BillWidget(this.amountDue, this.status, this.generationDate, this.type);
+  BillWidget(this.amountDue, this.status, this.generationDate, this.type, this.updatePaidBills);
 
   @override
   _BillWidgetState createState() => _BillWidgetState();
 }
 
 class _BillWidgetState extends State<BillWidget> {
-  bool paid = false;
+  bool _paid = false;
+  bool get paid {
+    return _paid;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +31,11 @@ class _BillWidgetState extends State<BillWidget> {
         Text(widget.type),
         CheckboxListTile(
           title: Text("Paid"),
-          value: paid,
+          value: _paid,
           onChanged: (newValue) {
             setState(() {
-              paid = newValue;
+              this.widget.updatePaidBills(newValue, widget.type);
+              _paid = newValue;
             });
           },
           controlAffinity: ListTileControlAffinity.leading,  //  <-- leading Checkbox

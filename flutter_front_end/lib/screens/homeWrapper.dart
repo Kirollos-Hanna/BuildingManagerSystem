@@ -6,6 +6,7 @@ import 'home/residentHome.dart';
 import 'home/buildingManagerHome.dart';
 import 'home/businessOwnerHome.dart';
 import 'home/role.dart';
+import 'package:flutter_front_end/providers/billsProvider.dart';
 
 class HomeWrapper extends StatelessWidget {
   @override
