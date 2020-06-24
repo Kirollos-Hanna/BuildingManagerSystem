@@ -35,7 +35,7 @@ class _BillWidgetState extends State<BillWidget> {
           value: _paid,
           onChanged: (newValue) {
             setState(() {
-              this.widget.updatePaidBills(newValue, widget.documentID, widget.amountDue);
+              this.widget.updatePaidBills(newValue, widget.type, widget.generationDate, widget.amountDue, widget.documentID);
               _paid = newValue;
             });
           },

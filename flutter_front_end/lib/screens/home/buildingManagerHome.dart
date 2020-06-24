@@ -7,6 +7,7 @@ import 'package:flutter_front_end/screens/homeWrapper.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:flutter_front_end/services/database.dart';
 import 'package:flutter_front_end/widgets/billWidget.dart';
+import 'package:flutter_front_end/widgets/payedBillsWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -96,10 +97,6 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
     final user = Provider.of<User>(context);
     print(managerID);
     // TODO make the manager specify the number of residents in the building along with the number of business owners
-
-    // if amountDue of a bill = 0, then it's status becomes = paid
-    // manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
-    // if manager verifies the message, subtract amount payed from original bill
 
     return !asyncDone
         ? Loading()
@@ -275,6 +272,93 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                       });
                     },
                   ),
+                  Text("Reports"),
+                  StreamBuilder(
+                      stream: Firestore.instance
+                          .collection('bills/' + managerID + '/payedbills')
+                          .snapshots(),
+                      builder: (ctx, streamSnapshot) {
+                        print(streamSnapshot.connectionState);
+                        if (streamSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: Loading(),
+                          );
+                        }
+
+                        final documents = streamSnapshot.data.documents;
+
+                        print("Docs");
+                        print(documents);
+
+                        var visibleDocs = [...documents];
+
+//                        print("Bills");
+//                        print(alreadyPayedBills);
+                        documents.forEach((el) {
+                          if (el['verified']) {
+                            visibleDocs.remove(el);
+                          }
+                        });
+
+                        Future<void> verifyPaidBills(String documentID,
+                            String billID, String amountPayed) async {
+                          // if manager verifies the message, subtract amount payed from original bill
+                          int amountDifference = 1;
+                          await Firestore.instance
+                              .collection('bills/' + managerID + '/bills')
+                              .document(billID)
+                              .get()
+                              .then((value) {
+                            amountDifference =
+                                value['amountDue'] - int.parse(amountPayed);
+                          });
+
+                          // if amountDue of a bill = 0, then it's status becomes = paid
+                          if(amountDifference <= 0){
+                            await Firestore.instance
+                                .collection('bills/' + managerID + '/bills')
+                                .document(billID)
+                                .updateData({'amountDue': amountDifference, 'status': "paid"});
+                          } else {
+                            await Firestore.instance
+                                .collection('bills/' + managerID + '/bills')
+                                .document(billID)
+                                .updateData({'amountDue': amountDifference});
+                          }
+
+                          await Firestore.instance
+                              .collection('bills/' + managerID + '/payedbills')
+                              .document(documentID)
+                              .updateData({"verified": true});
+                        }
+
+                        Future<void> doNotVerifyPaidBills(
+                            String documentID) async {
+                          // Delete bill document from payedBills
+                          await Firestore.instance
+                              .collection('bills/' + managerID + '/payedbills')
+                              .document(documentID)
+                              .delete();
+                        }
+
+                        // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
+                        return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: visibleDocs.length,
+                            itemBuilder: (ctx, index) => Container(
+                                  child: PayedBillsWidget(
+                                    visibleDocs[index].documentID,
+                                      visibleDocs[index]['amountPayed']
+                                          .toString(),
+                                      visibleDocs[index]['generationDate'],
+                                      visibleDocs[index]['type'],
+                                      visibleDocs[index]['payerName'],
+                                      visibleDocs[index]['billID'],
+                                      verifyPaidBills,
+                                      doNotVerifyPaidBills),
+                                ));
+                      }),
                 ],
               ),
             ),
