@@ -21,6 +21,8 @@ class _ResidentHomeState extends State<ResidentHome> {
   bool asyncDone = false;
   String userName = "";
   String pricePaidNotification = "";
+  double totalNumberOfResidents = 1;
+  String userRole = "";
 
   List<dynamic> payedBills = [];
   List<dynamic> alreadyPayedBills = [];
@@ -39,6 +41,7 @@ class _ResidentHomeState extends State<ResidentHome> {
     var currentDoc =
         Firestore.instance.collection('additionalinfo').document(user.uid);
     await currentDoc.get().then((value) {
+      userRole = value['role'];
       buildingAddress = value['address'].sublist(2, value['address'].length);
     });
 
@@ -69,6 +72,17 @@ class _ResidentHomeState extends State<ResidentHome> {
       });
     });
 
+    CollectionReference residentsCollection =
+    Firestore.instance.collection('/residents');
+
+    await residentsCollection.document(managerID).get()
+        .then((value) {
+          setState(() {
+            totalNumberOfResidents = value["residents"].toDouble();
+            totalNumberOfResidents += value["businessOwners"]*2.0;
+          });
+    });
+
     CollectionReference payedBillsCollection =
         Firestore.instance.collection('bills/' + managerID + '/payedbills');
 
@@ -87,7 +101,6 @@ class _ResidentHomeState extends State<ResidentHome> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
-
 
     return !asyncDone
         ? Loading()
@@ -111,7 +124,6 @@ class _ResidentHomeState extends State<ResidentHome> {
               ),
               body: Column(
                 children: <Widget>[
-                  Text("Resident Home"),
                   SizedBox(
                     height: 20,
                   ),
@@ -128,6 +140,8 @@ class _ResidentHomeState extends State<ResidentHome> {
                         }
 
                         final documents = streamSnapshot.data.documents;
+
+
 
                         var visibleDocs = [...documents];
 
@@ -164,14 +178,18 @@ class _ResidentHomeState extends State<ResidentHome> {
                           }
                         }
 
+                        if(userRole == "Business Owner"){
+                          totalNumberOfResidents /= 2.0;
+                        }
+
                         return ListView.builder(
                             shrinkWrap: true,
                             itemCount: visibleDocs.length,
                             itemBuilder: (ctx, index) => Container(
                                   child: BillWidget(
                                       visibleDocs[index].documentID,
-                                      visibleDocs[index]['amountDue']
-                                          .toString(),
+                                      (visibleDocs[index]['amountDue'] / totalNumberOfResidents)
+                                          .toStringAsFixed(2), // TODO refactor this with the correct price up to 2 decimal points only
                                       visibleDocs[index]['status'],
                                       visibleDocs[index]['generationDate'],
                                       visibleDocs[index]['type'],

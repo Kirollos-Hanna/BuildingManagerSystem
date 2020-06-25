@@ -27,10 +27,8 @@ class HomeWrapper extends StatelessWidget {
 
     if(currentRole == "Building Manager"){
       return BuildingManagerHome();
-    } else if (currentRole == "Resident"){
+    } else if (currentRole == "Business Owner" || currentRole == "Resident"){
       return ResidentHome();
-    } else if (currentRole == "Business Owner"){
-      return BusinessOwnerHome();
     } else if (currentRole == "undecided"){
       return Role();
     } else {

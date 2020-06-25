@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_front_end/constants/loading.dart';
 import 'package:flutter_front_end/models/Bill.dart';
 import 'package:flutter_front_end/models/User.dart';
@@ -21,6 +22,8 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
 
   int price = 0;
   String billType = "";
+  int residentsNumber = 0;
+  int businessOwnersNumber = 0;
 
   String dropdownString = "Water";
 
@@ -179,14 +182,57 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                           "-" +
                           currentDate.day.toString();
 
-                      // TODO change the uid to a dynamic one
                       Firestore.instance
                           .collection('bills/' + managerID + '/bills')
                           .add({
                         "status": 'unpaid',
+                        "amountPaid": 0.0,
                         "generationDate": date,
                         "type": billType,
                         "amountDue": price
+                      });
+                    },
+                  ),
+                  Text("Set number of residents in building"),
+                  TextField(
+                    decoration: new InputDecoration(
+                        labelText: "Enter number of normal residents"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        residentsNumber = int.parse(val);
+                      });
+                    },
+                  ),
+                  TextField(
+                    decoration: new InputDecoration(
+                        labelText: "Enter number of business owners"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        businessOwnersNumber = int.parse(val);
+                      });
+                    },
+                  ),
+                  RaisedButton(
+                    color: Colors.pink[400],
+                    child: Text(
+                      "Submit Total",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    onPressed: () {
+                      CollectionReference residentsCollection =
+                          Firestore.instance.collection('/residents');
+
+                      residentsCollection.document(managerID).setData({
+                        "residents": residentsNumber,
+                        "businessOwners": businessOwnersNumber
                       });
                     },
                   ),
@@ -205,9 +251,6 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
 
                         final documents = streamSnapshot.data.documents;
 
-                        print("Docs");
-                        print(documents);
-
                         String userName = "";
                         Firestore.instance
                             .collection('additionalinfo')
@@ -217,16 +260,12 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
 
                         var visibleDocs = [...documents];
 
-                        print("Bills");
-                        print(alreadyPayedBills);
                         documents.forEach((el) {
                           // if el.documentID in documents, remove it from visibleDocs
                           if (alreadyPayedBills.contains(el.documentID)) {
                             visibleDocs.remove(el);
                           }
                         });
-
-                        print(visibleDocs);
 
                         // updated payedBills variable with the amountDue and type of bills that have been checked as paid
                         void updatePaidBills(
@@ -304,27 +343,32 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                         Future<void> verifyPaidBills(String documentID,
                             String billID, String amountPayed) async {
                           // if manager verifies the message, subtract amount payed from original bill
-                          int amountDifference = 1;
+                          double amountDifference = 0.0;
+                          double amountDue = 0.0;
                           await Firestore.instance
                               .collection('bills/' + managerID + '/bills')
                               .document(billID)
                               .get()
                               .then((value) {
+                            amountDue = value['amountDue'].toDouble();
                             amountDifference =
-                                value['amountDue'] - int.parse(amountPayed);
+                                value['amountPaid'] + double.parse(amountPayed);
                           });
 
                           // if amountDue of a bill = 0, then it's status becomes = paid
-                          if(amountDifference <= 0){
+                          if (amountDifference >= amountDue) {
                             await Firestore.instance
                                 .collection('bills/' + managerID + '/bills')
                                 .document(billID)
-                                .updateData({'amountDue': amountDifference, 'status': "paid"});
+                                .updateData({
+                              'amountPaid': amountDifference,
+                              'status': "paid"
+                            });
                           } else {
                             await Firestore.instance
                                 .collection('bills/' + managerID + '/bills')
                                 .document(billID)
-                                .updateData({'amountDue': amountDifference});
+                                .updateData({'amountPaid': amountDifference});
                           }
 
                           await Firestore.instance
@@ -348,7 +392,7 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                             itemCount: visibleDocs.length,
                             itemBuilder: (ctx, index) => Container(
                                   child: PayedBillsWidget(
-                                    visibleDocs[index].documentID,
+                                      visibleDocs[index].documentID,
                                       visibleDocs[index]['amountPayed']
                                           .toString(),
                                       visibleDocs[index]['generationDate'],
