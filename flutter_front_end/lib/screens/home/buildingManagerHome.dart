@@ -8,6 +8,7 @@ import 'package:flutter_front_end/screens/homeWrapper.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:flutter_front_end/services/database.dart';
 import 'package:flutter_front_end/widgets/billWidget.dart';
+import 'package:flutter_front_end/widgets/buildingManagerWidget.dart';
 import 'package:flutter_front_end/widgets/payedBillsWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -119,123 +120,12 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                 ),
               ],
             ),
+            drawer: BuildingManagerWidget(),
             body: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
                   SizedBox(height: 20.0),
-                  DropdownButton<String>(
-                    value: dropdownString,
-                    icon: Icon(Icons.arrow_downward),
-                    iconSize: 24,
-                    elevation: 16,
-                    underline: Container(
-                      height: 2,
-                      color: Colors.black,
-                    ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        dropdownString = newValue;
-                        billType = newValue;
-                      });
-                    },
-                    items: <String>[
-                      "Water",
-                      "Electricity",
-                      "Elevator",
-                      "Salaries",
-                      "Cleaning",
-                      "Other"
-                    ].map<DropdownMenuItem<String>>((String val) {
-                      return DropdownMenuItem<String>(
-                        value: val,
-                        child: Text(val),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  TextFormField(
-                    validator: (val) => val.isEmpty ? 'Enter a price' : null,
-                    decoration:
-                        InputDecoration(hintText: "Bill price to be paid"),
-                    onChanged: (val) {
-                      setState(() {
-                        price = int.parse(val);
-                      });
-                    },
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  RaisedButton(
-                    color: Colors.pink[400],
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      DateTime currentDate = new DateTime.now();
-                      String date = currentDate.year.toString() +
-                          "-" +
-                          currentDate.month.toString() +
-                          "-" +
-                          currentDate.day.toString();
-
-                      Firestore.instance
-                          .collection('bills/' + managerID + '/bills')
-                          .add({
-                        "status": 'unpaid',
-                        "amountPaid": 0.0,
-                        "generationDate": date,
-                        "type": billType,
-                        "amountDue": price
-                      });
-                    },
-                  ),
-                  Text("Set number of residents in building"),
-                  TextField(
-                    decoration: new InputDecoration(
-                        labelText: "Enter number of normal residents"),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        residentsNumber = int.parse(val);
-                      });
-                    },
-                  ),
-                  TextField(
-                    decoration: new InputDecoration(
-                        labelText: "Enter number of business owners"),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        businessOwnersNumber = int.parse(val);
-                      });
-                    },
-                  ),
-                  RaisedButton(
-                    color: Colors.pink[400],
-                    child: Text(
-                      "Submit Total",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      CollectionReference residentsCollection =
-                          Firestore.instance.collection('/residents');
-
-                      residentsCollection.document(managerID).setData({
-                        "residents": residentsNumber,
-                        "businessOwners": businessOwnersNumber
-                      });
-                    },
-                  ),
+                  Text("Bill Table"),
                   StreamBuilder(
                       stream: Firestore.instance
                           .collection('bills/' + managerID + '/bills')

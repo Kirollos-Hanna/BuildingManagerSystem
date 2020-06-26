@@ -28,11 +28,6 @@ class _ResidentHomeState extends State<ResidentHome> {
   List<dynamic> alreadyPayedBills = [];
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
 
