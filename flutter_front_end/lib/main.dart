@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_front_end/screens/authenticate/login.dart';
 import 'package:flutter_front_end/screens/home/billForm.dart';
 import 'package:flutter_front_end/screens/home/billTableWidget.dart';
+import 'package:flutter_front_end/screens/home/buildingManagerHome.dart';
+import 'package:flutter_front_end/screens/home/reportsWidget.dart';
 import 'package:flutter_front_end/screens/home/residentNumberForm.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +27,9 @@ class MyApp extends StatelessWidget {
           BillForm.routeName: (ctx) => BillForm(),
           ResidentNumberForm.routeName: (ctx) => ResidentNumberForm(),
           BillTableWidget.routeName: (ctx) => BillTableWidget(),
+          ReportsWidget.routeName: (ctx) => ReportsWidget(),
+          BuildingManagerHome.routeName: (ctx) => BuildingManagerHome(),
+          Login.routeName: (ctx) => Login(),
         },
       ),
     );

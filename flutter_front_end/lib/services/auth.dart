@@ -50,6 +50,7 @@ class AuthService {
     try{
       return await _auth.signOut();
     } catch(e){
+      print("error");
       print(e.toString());
       return null;
     }

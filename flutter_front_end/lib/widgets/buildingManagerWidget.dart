@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/screens/home/billForm.dart';
 import 'package:flutter_front_end/screens/home/billTableWidget.dart';
+import 'package:flutter_front_end/screens/home/buildingManagerHome.dart';
+import 'package:flutter_front_end/screens/home/reportsWidget.dart';
 import 'package:flutter_front_end/screens/home/residentNumberForm.dart';
 
 class BuildingManagerWidget extends StatelessWidget {
@@ -37,14 +39,20 @@ class BuildingManagerWidget extends StatelessWidget {
           SizedBox(
             height: 20,
           ),
+          buildListTile("Home", Icons.home, () {
+            Navigator.of(context).pushReplacementNamed(BuildingManagerHome.routeName);
+          }),
           buildListTile("Write Bills", Icons.account_balance_wallet, () {
-            Navigator.of(context).pushNamed(BillForm.routeName);
+            Navigator.of(context).pushReplacementNamed(BillForm.routeName);
           }),
-          buildListTile("Set Resident Number", Icons.person_add,() {
-            Navigator.of(context).pushNamed(ResidentNumberForm.routeName);
+          buildListTile("Set Resident Number", Icons.person_add, () {
+            Navigator.of(context).pushReplacementNamed(ResidentNumberForm.routeName);
           }),
-          buildListTile("Bills Table", Icons.table_chart,() {
-            Navigator.of(context).pushNamed(BillTableWidget.routeName);
+          buildListTile("My Bills", Icons.monetization_on, () {
+            Navigator.of(context).pushReplacementNamed(BillTableWidget.routeName);
+          }),
+          buildListTile("Reports", Icons.report, () {
+            Navigator.of(context).pushReplacementNamed(ReportsWidget.routeName);
           }),
         ],
       ),

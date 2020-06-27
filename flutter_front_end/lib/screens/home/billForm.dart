@@ -89,10 +89,10 @@ class _BillFormState extends State<BillForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.brown[50],
+      backgroundColor: Color(0xFFC8A2C8),
       appBar: AppBar(
         title: Text("Bill Form"),
-        backgroundColor: Colors.brown[400],
+        backgroundColor: Color(0xFF852DCE),
         elevation: 0.0,
       ),
       drawer: BuildingManagerWidget(),
@@ -130,20 +130,25 @@ class _BillFormState extends State<BillForm> {
           SizedBox(
             height: 20.0,
           ),
-          TextFormField(
-            validator: (val) => val.isEmpty ? 'Enter a price' : null,
-            decoration: InputDecoration(hintText: "Bill price to be paid"),
-            onChanged: (val) {
-              setState(() {
-                price = int.parse(val);
-              });
-            },
+
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: TextFormField(
+
+              validator: (val) => val.isEmpty ? 'Enter a price' : null,
+              decoration: InputDecoration(hintText: "Bill price to be paid"),
+              onChanged: (val) {
+                setState(() {
+                  price = int.parse(val);
+                });
+              },
+            ),
           ),
           SizedBox(
             height: 20.0,
           ),
           RaisedButton(
-            color: Colors.pink[400],
+            color: Color(0xFF852DCE),
             child: Text(
               "Submit",
               style: TextStyle(color: Colors.white),

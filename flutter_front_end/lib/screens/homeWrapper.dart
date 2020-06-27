@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_front_end/constants/loading.dart';
 import 'package:flutter_front_end/models/User.dart';
 import 'package:provider/provider.dart';
 import 'home/residentHome.dart';
@@ -33,7 +34,7 @@ class HomeWrapper extends StatelessWidget {
       return Role();
     } else {
       return Center(
-        child: CircularProgressIndicator(),
+        child: Loading(),
       );
     }
   }

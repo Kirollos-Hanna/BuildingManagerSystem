@@ -90,43 +90,49 @@ class _ResidentNumberFormState extends State<ResidentNumberForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.brown[50],
+      backgroundColor: Color(0xFFC8A2C8),
       appBar: AppBar(
-        title: Text("Bill Form"),
-        backgroundColor: Colors.brown[400],
+        title: Text("Resident Number Form"),
+        backgroundColor: Color(0xFF852DCE),
         elevation: 0.0,
       ),
       drawer: BuildingManagerWidget(),
       body: Column(
         children: <Widget>[
-          TextField(
-            decoration: new InputDecoration(
-                labelText: "Enter number of normal residents"),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter.digitsOnly
-            ],
-            onChanged: (val) {
-              setState(() {
-                residentsNumber = int.parse(val);
-              });
-            },
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: TextField(
+              decoration: new InputDecoration(
+                  labelText: "Enter number of normal residents"),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                WhitelistingTextInputFormatter.digitsOnly
+              ],
+              onChanged: (val) {
+                setState(() {
+                  residentsNumber = int.parse(val);
+                });
+              },
+            ),
           ),
-          TextField(
-            decoration: new InputDecoration(
-                labelText: "Enter number of business owners"),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter.digitsOnly
-            ],
-            onChanged: (val) {
-              setState(() {
-                businessOwnersNumber = int.parse(val);
-              });
-            },
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: TextField(
+              decoration: new InputDecoration(
+                  labelText: "Enter number of business owners"),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                WhitelistingTextInputFormatter.digitsOnly
+              ],
+              onChanged: (val) {
+                setState(() {
+                  businessOwnersNumber = int.parse(val);
+                });
+              },
+            ),
           ),
           RaisedButton(
-            color: Colors.pink[400],
+            color: Color(0xFF852DCE),
             child: Text(
               "Submit Total",
               style: TextStyle(color: Colors.white),

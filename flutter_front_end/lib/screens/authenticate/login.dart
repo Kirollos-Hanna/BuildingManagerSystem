@@ -3,6 +3,7 @@ import 'package:flutter_front_end/constants/loading.dart';
 import 'package:flutter_front_end/services/auth.dart';
 
 class Login extends StatefulWidget {
+  static const routeName = "/Login";
 
   final Function toggleView;
 
@@ -26,9 +27,9 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return loading? Loading() : Scaffold(
-      backgroundColor: Colors.brown[100],
+      backgroundColor: Color(0xFFC8A2C8),
       appBar: AppBar(
-        backgroundColor: Colors.brown[400],
+        backgroundColor: Color(0xFF852DCE),
         elevation: 0.0,
         title: Text("Login"),
         actions: <Widget>[
@@ -74,7 +75,7 @@ class _LoginState extends State<Login> {
               ),
               SizedBox(height: 20.0,),
               RaisedButton(
-                color: Colors.pink[400],
+                color: Color(0xFF852DCE),
                 child: Text(
                     "Log in",
                   style: TextStyle(color: Colors.white),

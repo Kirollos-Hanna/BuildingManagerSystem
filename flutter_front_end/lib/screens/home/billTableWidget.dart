@@ -5,6 +5,7 @@ import 'package:flutter_front_end/models/User.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:flutter_front_end/services/database.dart';
 import 'package:flutter_front_end/widgets/billWidget.dart';
+import 'package:flutter_front_end/widgets/buildingManagerWidget.dart';
 import 'package:provider/provider.dart';
 
 class BillTableWidget extends StatefulWidget {
@@ -98,13 +99,14 @@ class _BillTableWidgetState extends State<BillTableWidget> {
 
   @override
   Widget build(BuildContext context) {
+
     return StreamProvider<QuerySnapshot>.value(
       value: DatabaseService().role,
       child: Scaffold(
-        backgroundColor: Colors.brown[50],
+        backgroundColor: Color(0xFFC8A2C8),
         appBar: AppBar(
-          title: Text("Home Page"),
-          backgroundColor: Colors.brown[400],
+          title: Text("My Bills"),
+          backgroundColor: Color(0xFF852DCE),
           elevation: 0.0,
           actions: <Widget>[
             FlatButton.icon(
@@ -116,115 +118,116 @@ class _BillTableWidgetState extends State<BillTableWidget> {
             ),
           ],
         ),
-        body: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 20,
-            ),
-            StreamBuilder(
-                stream: Firestore.instance
-                    .collection('bills/' + managerID + '/bills')
-                    .snapshots(),
-                builder: (ctx, streamSnapshot) {
-                  if (streamSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return Center(
-                      child: Loading(),
-                    );
-                  }
-
-                  final documents = streamSnapshot.data.documents;
-
-
-
-                  var visibleDocs = [...documents];
-
-                  documents.forEach((el) {
-                    // if el.documentID is in documents, remove it from visibleDocs
-                    if (alreadyPayedBills.contains(el.documentID)) {
-                      visibleDocs.remove(el);
-                    }
-                  });
-
-                  // updated payedBills variable with the amountDue and type of bills that have been checked as paid
-                  void updatePaidBills(
-                      bool paid,
-                      String type,
-                      String generationDate,
-                      String price,
-                      String billID) {
-                    if (paid) {
-                      payedBills.add([
-                        userName,
-                        type,
-                        generationDate,
-                        price,
-                        billID
-                      ]);
-                    } else {
-                      payedBills.remove([
-                        userName,
-                        type,
-                        generationDate,
-                        price,
-                        billID
-                      ]);
-                    }
-                  }
-
-                  if(userRole == "Business Owner"){
-                    totalNumberOfResidents /= 2.0;
-                  }
-
-                  return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: visibleDocs.length,
-                      itemBuilder: (ctx, index) => Container(
-                        child: BillWidget(
-                            visibleDocs[index].documentID,
-                            (visibleDocs[index]['amountDue'] / totalNumberOfResidents)
-                                .toStringAsFixed(2), // TODO refactor this with the correct price up to 2 decimal points only
-                            visibleDocs[index]['status'],
-                            visibleDocs[index]['generationDate'],
-                            visibleDocs[index]['type'],
-                            updatePaidBills),
-                      ));
-                }),
-            Text(pricePaidNotification),
-            RaisedButton(
-              color: Colors.pink[400],
-              child: Text(
-                "Submit payments",
-                style: TextStyle(color: Colors.white),
+        drawer: BuildingManagerWidget(),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 20,
               ),
-              onPressed: () {
-                // send verification to manager (Data: type, amount, name)
-                CollectionReference payedBillsCollection = Firestore
-                    .instance
-                    .collection('bills/' + managerID + '/payedbills');
+              StreamBuilder(
+                  stream: Firestore.instance
+                      .collection('bills/' + managerID + '/bills')
+                      .snapshots(),
+                  builder: (ctx, streamSnapshot) {
+                    if (streamSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Center(
+                        child: Loading(),
+                      );
+                    }
 
-                payedBills.forEach((element) {
-                  payedBillsCollection.add({
-                    "billID": element[4],
-                    "amountPayed": element[3],
-                    "generationDate": element[2],
-                    "type": element[1],
-                    "payerName": element[0],
-                    "verified": false
-                  });
-                });
+                    final documents = streamSnapshot.data.documents;
 
-                setState(() {
-                  pricePaidNotification = "Bill has been paid";
-                  print(payedBills);
+                    var visibleDocs = [...documents];
+
+                    documents.forEach((el) {
+                      // if el.documentID is in documents, remove it from visibleDocs
+                      if (alreadyPayedBills.contains(el.documentID)) {
+                        visibleDocs.remove(el);
+                      }
+                    });
+
+                    // updated payedBills variable with the amountDue and type of bills that have been checked as paid
+                    void updatePaidBills(
+                        bool paid,
+                        String type,
+                        String generationDate,
+                        String price,
+                        String billID) {
+                      if (paid) {
+                        payedBills.add([
+                          userName,
+                          type,
+                          generationDate,
+                          price,
+                          billID
+                        ]);
+                      } else {
+                        payedBills.remove([
+                          userName,
+                          type,
+                          generationDate,
+                          price,
+                          billID
+                        ]);
+                      }
+                    }
+
+                    if(userRole == "Business Owner"){
+                      totalNumberOfResidents /= 2.0;
+                    }
+
+                    return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: visibleDocs.length,
+                        itemBuilder: (ctx, index) => Container(
+                          child: BillWidget(
+                              visibleDocs[index].documentID,
+                              (visibleDocs[index]['amountDue'] / totalNumberOfResidents)
+                                  .toStringAsFixed(2), // TODO refactor this with the correct price up to 2 decimal points only
+                              visibleDocs[index]['status'],
+                              visibleDocs[index]['generationDate'],
+                              visibleDocs[index]['type'],
+                              updatePaidBills),
+                        ));
+                  }),
+              Text(pricePaidNotification),
+              RaisedButton(
+                color: Color(0xFF852DCE),
+                child: Text(
+                  "Submit payments",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onPressed: () {
+                  // send verification to manager (Data: type, amount, name)
+                  CollectionReference payedBillsCollection = Firestore
+                      .instance
+                      .collection('bills/' + managerID + '/payedbills');
+
                   payedBills.forEach((element) {
-                    alreadyPayedBills.add(element[4]);
+                    payedBillsCollection.add({
+                      "billID": element[4],
+                      "amountPayed": element[3],
+                      "generationDate": element[2],
+                      "type": element[1],
+                      "payerName": element[0],
+                      "verified": false
+                    });
                   });
-                  payedBills = [];
-                });
-              },
-            ),
-          ],
+
+                  setState(() {
+                    pricePaidNotification = "Bill has been paid";
+                    print(payedBills);
+                    payedBills.forEach((element) {
+                      alreadyPayedBills.add(element[4]);
+                    });
+                    payedBills = [];
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
