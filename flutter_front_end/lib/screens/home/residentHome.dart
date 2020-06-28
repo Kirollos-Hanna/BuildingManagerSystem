@@ -31,6 +31,8 @@ class _ResidentHomeState extends State<ResidentHome> {
   List<dynamic> alreadyPayedBills = [];
 
   double billTotal = 0;
+  bool hasManager = false;
+
 
   @override
   Future<void> didChangeDependencies() async {
@@ -65,6 +67,7 @@ class _ResidentHomeState extends State<ResidentHome> {
               buildingAddress.toString()) {
             setState(() {
               managerID = element.documentID;
+              hasManager = true;
               asyncDone = true;
             });
           }
@@ -72,14 +75,26 @@ class _ResidentHomeState extends State<ResidentHome> {
       });
     });
 
+    if (managerID == "a") {
+      setState(() {
+        hasManager = false;
+        asyncDone = true;
+      });
+    }
+
+    print("Manager");
+    print(managerID);
+
     CollectionReference residentsCollection =
         Firestore.instance.collection('/residents');
 
     await residentsCollection.document(managerID).get().then((value) {
-      setState(() {
-        totalNumberOfResidents = value["residents"].toDouble();
-        totalNumberOfResidents += value["businessOwners"] * 2.0;
-      });
+      if (value.data != null) {
+        setState(() {
+          totalNumberOfResidents = value["residents"].toDouble();
+          totalNumberOfResidents += value["businessOwners"] * 2.0;
+        });
+      }
     });
 
     CollectionReference payedBillsCollection =
@@ -132,139 +147,152 @@ class _ResidentHomeState extends State<ResidentHome> {
                     label: Text('logout'),
                     onPressed: () async {
                       await _auth.signOut();
-                      Navigator.of(context).pushReplacementNamed(Wrapper.routeName);
+                      Navigator.of(context)
+                          .pushReplacementNamed(Wrapper.routeName);
                     },
                   ),
                 ],
               ),
               drawer: ResidentDrawerWidget(),
-              body: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 20,
-                    ),
-                    StreamBuilder(
-                        stream: Firestore.instance
-                            .collection('bills/' + managerID + '/bills')
-                            .snapshots(),
-                        builder: (ctx, streamSnapshot) {
-                          if (streamSnapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return Center(
-                              child: Loading(),
-                            );
-                          }
-
-                          final documents = streamSnapshot.data.documents;
-
-                          var visibleDocs = [...documents];
-
-                          documents.forEach((el) {
-                            // if el.documentID is in documents, remove it from visibleDocs
-                            if (alreadyPayedBills.contains(el.documentID)) {
-                              visibleDocs.remove(el);
-                            }
-                          });
-
-                          // updated payedBills variable with the amountDue and type of bills that have been checked as paid
-                          void updatePaidBills(
-                              bool paid,
-                              String type,
-                              String generationDate,
-                              String price,
-                              String billID) {
-                            if (paid) {
-                              payedBills.add([
-                                userName,
-                                type,
-                                generationDate,
-                                price,
-                                billID
-                              ]);
-                            } else {
-                              payedBills.remove([
-                                userName,
-                                type,
-                                generationDate,
-                                price,
-                                billID
-                              ]);
-                            }
-                          }
-
-                          if (userRole == "Business Owner") {
-                            totalNumberOfResidents /= 2.0;
-                          }
-
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 0, horizontal: 50),
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: visibleDocs.length,
-                                itemBuilder: (ctx, index) => Container(
-                                      child: BillWidget(
-                                          visibleDocs[index].documentID,
-                                          (visibleDocs[index]['amountDue'] /
-                                                  totalNumberOfResidents)
-                                              .toStringAsFixed(2),
-                                          visibleDocs[index]['status'],
-                                          visibleDocs[index]['generationDate'],
-                                          visibleDocs[index]['type'],
-                                          updatePaidBills),
-                                    )),
-                          );
-                        }),
-
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 50),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              body: !hasManager
+                  ? Center(
+                      child: Text(
+                        "Your building address has no manager",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
                         children: <Widget>[
-                          Text("Total Bill"),
-                          Text("total: " + billTotal.toStringAsFixed(2)),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          StreamBuilder(
+                              stream: Firestore.instance
+                                  .collection('bills/' + managerID + '/bills')
+                                  .snapshots(),
+                              builder: (ctx, streamSnapshot) {
+                                if (streamSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: Loading(),
+                                  );
+                                }
+
+                                final documents = streamSnapshot.data.documents;
+
+                                var visibleDocs = [...documents];
+
+                                documents.forEach((el) {
+                                  // if el.documentID is in documents, remove it from visibleDocs
+                                  if (alreadyPayedBills
+                                      .contains(el.documentID)) {
+                                    visibleDocs.remove(el);
+                                  }
+                                });
+
+                                // updated payedBills variable with the amountDue and type of bills that have been checked as paid
+                                void updatePaidBills(
+                                    bool paid,
+                                    String type,
+                                    String generationDate,
+                                    String price,
+                                    String billID) {
+                                  if (paid) {
+                                    payedBills.add([
+                                      userName,
+                                      type,
+                                      generationDate,
+                                      price,
+                                      billID
+                                    ]);
+                                  } else {
+                                    payedBills.remove([
+                                      userName,
+                                      type,
+                                      generationDate,
+                                      price,
+                                      billID
+                                    ]);
+                                  }
+                                }
+
+                                if (userRole == "Business Owner") {
+                                  totalNumberOfResidents /= 2.0;
+                                }
+
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 50),
+                                  child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: visibleDocs.length,
+                                      itemBuilder: (ctx, index) => Container(
+                                            child: BillWidget(
+                                                visibleDocs[index].documentID,
+                                                (visibleDocs[index]
+                                                            ['amountDue'] /
+                                                        totalNumberOfResidents)
+                                                    .toStringAsFixed(2),
+                                                visibleDocs[index]['status'],
+                                                visibleDocs[index]
+                                                    ['generationDate'],
+                                                visibleDocs[index]['type'],
+                                                updatePaidBills),
+                                          )),
+                                );
+                              }),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 50),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text("Total Bill"),
+                                Text("total: " + billTotal.toStringAsFixed(2)),
+                              ],
+                            ),
+                          ),
+                          Text(pricePaidNotification),
+                          RaisedButton(
+                            color: Color(0xFF852DCE),
+                            child: Text(
+                              "Submit payments",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            onPressed: () {
+                              // send verification to manager (Data: type, amount, name)
+                              CollectionReference payedBillsCollection =
+                                  Firestore.instance.collection(
+                                      'bills/' + managerID + '/payedbills');
+
+                              payedBills.forEach((element) {
+                                payedBillsCollection.add({
+                                  "billID": element[4],
+                                  "amountPayed": element[3],
+                                  "generationDate": element[2],
+                                  "type": element[1],
+                                  "payerName": element[0],
+                                  "verified": false
+                                });
+                              });
+
+                              setState(() {
+                                pricePaidNotification = "Bill has been paid";
+                                print(payedBills);
+                                payedBills.forEach((element) {
+                                  alreadyPayedBills.add(element[4]);
+                                  billTotal -= double.parse(element[3]);
+                                });
+                                payedBills = [];
+                              });
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    Text(pricePaidNotification),
-                    RaisedButton(
-                      color: Color(0xFF852DCE),
-                      child: Text(
-                        "Submit payments",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: () {
-                        // send verification to manager (Data: type, amount, name)
-                        CollectionReference payedBillsCollection = Firestore
-                            .instance
-                            .collection('bills/' + managerID + '/payedbills');
-
-                        payedBills.forEach((element) {
-                          payedBillsCollection.add({
-                            "billID": element[4],
-                            "amountPayed": element[3],
-                            "generationDate": element[2],
-                            "type": element[1],
-                            "payerName": element[0],
-                            "verified": false
-                          });
-                        });
-
-                        setState(() {
-                          pricePaidNotification = "Bill has been paid";
-                          print(payedBills);
-                          payedBills.forEach((element) {
-                            alreadyPayedBills.add(element[4]);
-                            billTotal -= double.parse(element[3]);
-                          });
-                          payedBills = [];
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
             ),
           );
   }
