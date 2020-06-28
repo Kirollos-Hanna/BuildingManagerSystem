@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
           ReportsWidget.routeName: (ctx) => ReportsWidget(),
           BuildingManagerHome.routeName: (ctx) => BuildingManagerHome(),
           Login.routeName: (ctx) => Login(),
+          Wrapper.routeName: (ctx) => Wrapper(),
         },
       ),
     );

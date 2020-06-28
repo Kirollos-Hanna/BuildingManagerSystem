@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_front_end/constants/loading.dart';
 import 'package:flutter_front_end/models/User.dart';
@@ -16,7 +17,6 @@ class BillTableWidget extends StatefulWidget {
 }
 
 class _BillTableWidgetState extends State<BillTableWidget> {
-
   final AuthService _auth = AuthService();
 
   List<dynamic> buildingAddress = [];
@@ -37,7 +37,7 @@ class _BillTableWidgetState extends State<BillTableWidget> {
     final user = Provider.of<User>(context);
 
     var currentDoc =
-    Firestore.instance.collection('additionalinfo').document(user.uid);
+        Firestore.instance.collection('additionalinfo').document(user.uid);
     await currentDoc.get().then((value) {
       userRole = value['role'];
       buildingAddress = value['address'].sublist(2, value['address'].length);
@@ -58,8 +58,8 @@ class _BillTableWidgetState extends State<BillTableWidget> {
         //TODO if a building manager doesn't exist for this address, tell the user they don't have a building manager
         if (element['role'] == "Building Manager") {
           if (element['address']
-              .sublist(2, element['address'].length)
-              .toString() ==
+                  .sublist(2, element['address'].length)
+                  .toString() ==
               buildingAddress.toString()) {
             setState(() {
               managerID = element.documentID;
@@ -71,18 +71,17 @@ class _BillTableWidgetState extends State<BillTableWidget> {
     });
 
     CollectionReference residentsCollection =
-    Firestore.instance.collection('/residents');
+        Firestore.instance.collection('/residents');
 
-    await residentsCollection.document(managerID).get()
-        .then((value) {
+    await residentsCollection.document(managerID).get().then((value) {
       setState(() {
         totalNumberOfResidents = value["residents"].toDouble();
-        totalNumberOfResidents += value["businessOwners"]*2.0;
+        totalNumberOfResidents += value["businessOwners"] * 2.0;
       });
     });
 
     CollectionReference payedBillsCollection =
-    Firestore.instance.collection('bills/' + managerID + '/payedbills');
+        Firestore.instance.collection('bills/' + managerID + '/payedbills');
 
     await payedBillsCollection.getDocuments().then((value) {
       value.documents.forEach((element) {
@@ -96,10 +95,8 @@ class _BillTableWidgetState extends State<BillTableWidget> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return StreamProvider<QuerySnapshot>.value(
       value: DatabaseService().role,
       child: Scaffold(
@@ -108,15 +105,6 @@ class _BillTableWidgetState extends State<BillTableWidget> {
           title: Text("My Bills"),
           backgroundColor: Color(0xFF852DCE),
           elevation: 0.0,
-          actions: <Widget>[
-            FlatButton.icon(
-              icon: Icon(Icons.person),
-              label: Text('logout'),
-              onPressed: () async {
-                await _auth.signOut();
-              },
-            ),
-          ],
         ),
         drawer: BuildingManagerWidget(),
         body: SingleChildScrollView(
@@ -149,48 +137,39 @@ class _BillTableWidgetState extends State<BillTableWidget> {
                     });
 
                     // updated payedBills variable with the amountDue and type of bills that have been checked as paid
-                    void updatePaidBills(
-                        bool paid,
-                        String type,
-                        String generationDate,
-                        String price,
-                        String billID) {
+                    void updatePaidBills(bool paid, String type,
+                        String generationDate, String price, String billID) {
                       if (paid) {
-                        payedBills.add([
-                          userName,
-                          type,
-                          generationDate,
-                          price,
-                          billID
-                        ]);
+                        payedBills.add(
+                            [userName, type, generationDate, price, billID]);
                       } else {
-                        payedBills.remove([
-                          userName,
-                          type,
-                          generationDate,
-                          price,
-                          billID
-                        ]);
+                        payedBills.remove(
+                            [userName, type, generationDate, price, billID]);
                       }
                     }
 
-                    if(userRole == "Business Owner"){
+                    if (userRole == "Business Owner") {
                       totalNumberOfResidents /= 2.0;
                     }
 
-                    return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: visibleDocs.length,
-                        itemBuilder: (ctx, index) => Container(
-                          child: BillWidget(
-                              visibleDocs[index].documentID,
-                              (visibleDocs[index]['amountDue'] / totalNumberOfResidents)
-                                  .toStringAsFixed(2), // TODO refactor this with the correct price up to 2 decimal points only
-                              visibleDocs[index]['status'],
-                              visibleDocs[index]['generationDate'],
-                              visibleDocs[index]['type'],
-                              updatePaidBills),
-                        ));
+                    return Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 0, horizontal: 50),
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: visibleDocs.length,
+                          itemBuilder: (ctx, index) => Container(
+                                child: BillWidget(
+                                    visibleDocs[index].documentID,
+                                    (visibleDocs[index]['amountDue'] /
+                                            totalNumberOfResidents)
+                                        .toStringAsFixed(2),
+                                    visibleDocs[index]['status'],
+                                    visibleDocs[index]['generationDate'],
+                                    visibleDocs[index]['type'],
+                                    updatePaidBills),
+                              )),
+                    );
                   }),
               Text(pricePaidNotification),
               RaisedButton(
@@ -201,8 +180,7 @@ class _BillTableWidgetState extends State<BillTableWidget> {
                 ),
                 onPressed: () {
                   // send verification to manager (Data: type, amount, name)
-                  CollectionReference payedBillsCollection = Firestore
-                      .instance
+                  CollectionReference payedBillsCollection = Firestore.instance
                       .collection('bills/' + managerID + '/payedbills');
 
                   payedBills.forEach((element) {
@@ -233,4 +211,3 @@ class _BillTableWidgetState extends State<BillTableWidget> {
     );
   }
 }
-

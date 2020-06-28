@@ -102,10 +102,10 @@ class _ResidentHomeState extends State<ResidentHome> {
         : StreamProvider<QuerySnapshot>.value(
             value: DatabaseService().role,
             child: Scaffold(
-              backgroundColor: Colors.brown[50],
+              backgroundColor: Color(0xFFC8A2C8),
               appBar: AppBar(
                 title: Text("Home Page"),
-                backgroundColor: Colors.brown[400],
+                backgroundColor: Color(0xFF852DCE),
                 elevation: 0.0,
                 actions: <Widget>[
                   FlatButton.icon(
@@ -194,7 +194,7 @@ class _ResidentHomeState extends State<ResidentHome> {
                         }),
                     Text(pricePaidNotification),
                     RaisedButton(
-                      color: Colors.pink[400],
+                      color: Color(0xFF852DCE),
                       child: Text(
                         "Submit payments",
                         style: TextStyle(color: Colors.white),

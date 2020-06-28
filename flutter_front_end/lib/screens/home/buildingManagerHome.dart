@@ -16,6 +16,8 @@ import 'package:flutter_front_end/widgets/payedBillsWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../wrapper.dart';
+
 class BuildingManagerHome extends StatefulWidget {
   static const routeName = "/BuildingManagerHome";
 
@@ -55,7 +57,7 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
       buildingAddress = value['address'].sublist(2, value['address'].length);
     });
 
-    Firestore.instance
+    await Firestore.instance
         .collection('additionalinfo')
         .document(user.uid)
         .get()
@@ -120,7 +122,7 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
                   label: Text('logout'),
                   onPressed: () async {
                     await _auth.signOut();
-                    Navigator.of(context).pushReplacementNamed(Login.routeName);
+                    Navigator.of(context).pushReplacementNamed(Wrapper.routeName);
                   },
                 ),
               ],

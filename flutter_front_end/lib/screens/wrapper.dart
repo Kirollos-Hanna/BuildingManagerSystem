@@ -6,6 +6,8 @@ import 'home/home.dart';
 import 'authenticate/authenticate.dart';
 
 class Wrapper extends StatelessWidget {
+  static const routeName = "/Wrapper";
+
   @override
   Widget build(BuildContext context) {
 
