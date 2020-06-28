@@ -4,6 +4,7 @@ import 'package:flutter_front_end/screens/home/billTableWidget.dart';
 import 'package:flutter_front_end/screens/home/buildingManagerHome.dart';
 import 'package:flutter_front_end/screens/home/personalPaymentHistory.dart';
 import 'package:flutter_front_end/screens/home/reportsWidget.dart';
+import 'package:flutter_front_end/screens/home/residentHome.dart';
 import 'package:flutter_front_end/screens/home/residentNumberForm.dart';
 import 'package:flutter_front_end/screens/home/userPaymentHistory.dart';
 
@@ -47,7 +48,7 @@ class _ResidentDrawerWidgetState extends State<ResidentDrawerWidget> {
             height: 20,
           ),
           buildListTile("Home", Icons.home, () {
-            Navigator.of(context).pushReplacementNamed(BuildingManagerHome.routeName);
+            Navigator.of(context).pushReplacementNamed(ResidentHome.routeName);
           }),
           buildListTile("Personal Payments History", Icons.info_outline, () {
             Navigator.of(context).pushReplacementNamed(PersonalPaymentHistoryWidget.routeName);
