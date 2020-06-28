@@ -15,6 +15,7 @@ import 'package:flutter_front_end/widgets/buildingManagerWidget.dart';
 import 'package:flutter_front_end/widgets/payedBillsWidget.dart';
 import 'package:flutter_front_end/widgets/rawBillWidget.dart';
 import 'package:flutter_front_end/widgets/rawPayedBillWidget.dart';
+import 'package:flutter_front_end/widgets/residentDrawerWidget.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -44,6 +45,9 @@ class _PersonalPaymentHistoryWidgetState extends State<PersonalPaymentHistoryWid
   List<dynamic> payedBills = [];
   List<dynamic> alreadyPayedBills = [];
 
+  String role = "";
+  Widget drawer;
+
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
@@ -55,8 +59,15 @@ class _PersonalPaymentHistoryWidgetState extends State<PersonalPaymentHistoryWid
 
     await currentDoc.get().then((value) {
       buildingAddress = value['address'].sublist(2, value['address'].length);
+      role = value['role'];
     });
-
+    
+    if(role == "Resident" || role == "Business Owner"){
+      drawer = ResidentDrawerWidget();
+    } else {
+      drawer = BuildingManagerWidget();
+    }
+    
     Firestore.instance
         .collection('additionalinfo')
         .document(user.uid)
@@ -113,7 +124,7 @@ class _PersonalPaymentHistoryWidgetState extends State<PersonalPaymentHistoryWid
         backgroundColor: Color(0xFF852DCE),
         elevation: 0.0,
       ),
-      drawer: BuildingManagerWidget(),
+      drawer: drawer,
       body: Column(
         children: <Widget>[
           StreamBuilder(

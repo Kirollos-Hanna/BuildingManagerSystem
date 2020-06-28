@@ -12,6 +12,8 @@ import 'package:provider/provider.dart';
 import '../wrapper.dart';
 
 class ResidentHome extends StatefulWidget {
+  static const routeName = "/ResidentHome";
+
   @override
   _ResidentHomeState createState() => _ResidentHomeState();
 }

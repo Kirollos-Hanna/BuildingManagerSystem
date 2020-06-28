@@ -5,6 +5,7 @@ import 'package:flutter_front_end/screens/home/billTableWidget.dart';
 import 'package:flutter_front_end/screens/home/buildingManagerHome.dart';
 import 'package:flutter_front_end/screens/home/personalPaymentHistory.dart';
 import 'package:flutter_front_end/screens/home/reportsWidget.dart';
+import 'package:flutter_front_end/screens/home/residentHome.dart';
 import 'package:flutter_front_end/screens/home/residentNumberForm.dart';
 import 'package:flutter_front_end/screens/home/userPaymentHistory.dart';
 import 'package:flutter_front_end/services/auth.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
           BillTableWidget.routeName: (ctx) => BillTableWidget(),
           ReportsWidget.routeName: (ctx) => ReportsWidget(),
           BuildingManagerHome.routeName: (ctx) => BuildingManagerHome(),
+          ResidentHome.routeName: (ctx) => ResidentHome(),
           Login.routeName: (ctx) => Login(),
           Wrapper.routeName: (ctx) => Wrapper(),
           UserPaymentHistoryWidget.routeName: (ctx) => UserPaymentHistoryWidget(),
