@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BusinessOwnerHome extends StatelessWidget {
-  // TODO show this page only after the user has decided their role
 
   final AuthService _auth = AuthService();
 

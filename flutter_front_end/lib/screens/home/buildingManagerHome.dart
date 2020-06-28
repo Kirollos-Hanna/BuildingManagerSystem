@@ -48,7 +48,6 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
     super.didChangeDependencies();
 
     final user = Provider.of<User>(context);
-//    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
 
     var currentDoc =
         Firestore.instance.collection('additionalinfo').document(user.uid);
@@ -106,7 +105,6 @@ class _BuildingManagerHomeState extends State<BuildingManagerHome> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<User>(context);
-    // TODO make the manager specify the number of residents in the building along with the number of business owners
 
     return !asyncDone
         ? Loading()

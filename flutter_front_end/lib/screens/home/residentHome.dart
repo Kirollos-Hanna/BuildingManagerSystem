@@ -6,7 +6,10 @@ import 'package:flutter_front_end/screens/homeWrapper.dart';
 import 'package:flutter_front_end/services/auth.dart';
 import 'package:flutter_front_end/services/database.dart';
 import 'package:flutter_front_end/widgets/billWidget.dart';
+import 'package:flutter_front_end/widgets/residentDrawerWidget.dart';
 import 'package:provider/provider.dart';
+
+import '../wrapper.dart';
 
 class ResidentHome extends StatefulWidget {
   @override
@@ -26,6 +29,8 @@ class _ResidentHomeState extends State<ResidentHome> {
 
   List<dynamic> payedBills = [];
   List<dynamic> alreadyPayedBills = [];
+
+  double billTotal = 0;
 
   @override
   Future<void> didChangeDependencies() async {
@@ -68,14 +73,13 @@ class _ResidentHomeState extends State<ResidentHome> {
     });
 
     CollectionReference residentsCollection =
-    Firestore.instance.collection('/residents');
+        Firestore.instance.collection('/residents');
 
-    await residentsCollection.document(managerID).get()
-        .then((value) {
-          setState(() {
-            totalNumberOfResidents = value["residents"].toDouble();
-            totalNumberOfResidents += value["businessOwners"]*2.0;
-          });
+    await residentsCollection.document(managerID).get().then((value) {
+      setState(() {
+        totalNumberOfResidents = value["residents"].toDouble();
+        totalNumberOfResidents += value["businessOwners"] * 2.0;
+      });
     });
 
     CollectionReference payedBillsCollection =
@@ -87,6 +91,21 @@ class _ResidentHomeState extends State<ResidentHome> {
             !alreadyPayedBills.contains(element["billID"])) {
           setState(() {
             alreadyPayedBills.add(element["billID"]);
+          });
+        }
+      });
+    });
+
+    billTotal = 0;
+    await Firestore.instance
+        .collection('bills/' + managerID + '/bills')
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((el) {
+        // if el.documentID is in documents, remove it from visibleDocs
+        if (!alreadyPayedBills.contains(el.documentID)) {
+          setState(() {
+            billTotal += el['amountDue'] / totalNumberOfResidents;
           });
         }
       });
@@ -113,10 +132,12 @@ class _ResidentHomeState extends State<ResidentHome> {
                     label: Text('logout'),
                     onPressed: () async {
                       await _auth.signOut();
+                      Navigator.of(context).pushReplacementNamed(Wrapper.routeName);
                     },
                   ),
                 ],
               ),
+              drawer: ResidentDrawerWidget(),
               body: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
@@ -136,8 +157,6 @@ class _ResidentHomeState extends State<ResidentHome> {
                           }
 
                           final documents = streamSnapshot.data.documents;
-
-
 
                           var visibleDocs = [...documents];
 
@@ -174,24 +193,40 @@ class _ResidentHomeState extends State<ResidentHome> {
                             }
                           }
 
-                          if(userRole == "Business Owner"){
+                          if (userRole == "Business Owner") {
                             totalNumberOfResidents /= 2.0;
                           }
 
-                          return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: visibleDocs.length,
-                              itemBuilder: (ctx, index) => Container(
-                                    child: BillWidget(
-                                        visibleDocs[index].documentID,
-                                        (visibleDocs[index]['amountDue'] / totalNumberOfResidents)
-                                            .toStringAsFixed(2), // TODO refactor this with the correct price up to 2 decimal points only
-                                        visibleDocs[index]['status'],
-                                        visibleDocs[index]['generationDate'],
-                                        visibleDocs[index]['type'],
-                                        updatePaidBills),
-                                  ));
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 50),
+                            child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: visibleDocs.length,
+                                itemBuilder: (ctx, index) => Container(
+                                      child: BillWidget(
+                                          visibleDocs[index].documentID,
+                                          (visibleDocs[index]['amountDue'] /
+                                                  totalNumberOfResidents)
+                                              .toStringAsFixed(2),
+                                          visibleDocs[index]['status'],
+                                          visibleDocs[index]['generationDate'],
+                                          visibleDocs[index]['type'],
+                                          updatePaidBills),
+                                    )),
+                          );
                         }),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 50),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text("Total Bill"),
+                          Text("total: " + billTotal.toStringAsFixed(2)),
+                        ],
+                      ),
+                    ),
                     Text(pricePaidNotification),
                     RaisedButton(
                       color: Color(0xFF852DCE),
@@ -221,6 +256,7 @@ class _ResidentHomeState extends State<ResidentHome> {
                           print(payedBills);
                           payedBills.forEach((element) {
                             alreadyPayedBills.add(element[4]);
+                            billTotal -= double.parse(element[3]);
                           });
                           payedBills = [];
                         });

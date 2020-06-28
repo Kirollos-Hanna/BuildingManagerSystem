@@ -30,7 +30,11 @@ samples, guidance on mobile development, and a full API reference.
 - Bills must be paid by all registered users in the same building **DONE**
 	- Business owners pay twice more than property owners for this bill **DONE**
 	- Identify how much an owner must pay based on their info **DONE**
-- Show bill history to managers
-- Show total bill to users
-- Show paid bill history to users
+- Show bill history to managers**DONE**
+- Show total bill to users**DONE**
+- Show paid bill history to users**DONE**
+- Add payer name buttons to ui in resident payments history
+- Show total bills payed overall
+- Show total bills payed for each payer
+- (optional) Managers can send notifications to users
 

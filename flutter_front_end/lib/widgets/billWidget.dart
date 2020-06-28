@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_front_end/widgets/rawBillWidget.dart';
 
 class BillWidget extends StatefulWidget {
   final String documentID;
@@ -44,21 +45,7 @@ class _BillWidgetState extends State<BillWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                "Bill: " + widget.type,
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-              ),
-              Text(
-                "Payment: " + widget.amountDue,
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-              ),
-            ],
-          ),
-//          Text(widget.status),
-          Text("Bill Date: " + widget.generationDate),
+          RawBillWidget(widget.amountDue, widget.generationDate, widget.type),
           CheckboxListTile(
             title: Text("Make Payment", style: TextStyle(fontSize: 16)),
             value: _paid,
@@ -72,9 +59,6 @@ class _BillWidgetState extends State<BillWidget> {
             },
             controlAffinity:
                 ListTileControlAffinity.leading, //  <-- leading Checkbox
-          ),
-          SizedBox(
-            height: 20,
           ),
         ],
       ),

@@ -1,20 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_front_end/constants/loading.dart';
+import 'package:flutter_front_end/models/Bill.dart';
 import 'package:flutter_front_end/models/User.dart';
+import 'package:flutter_front_end/screens/authenticate/login.dart';
+import 'package:flutter_front_end/screens/home/billTableWidget.dart';
+import 'package:flutter_front_end/screens/homeWrapper.dart';
 import 'package:flutter_front_end/services/auth.dart';
+import 'package:flutter_front_end/services/database.dart';
+import 'package:flutter_front_end/widgets/billWidget.dart';
 import 'package:flutter_front_end/widgets/buildingManagerWidget.dart';
 import 'package:flutter_front_end/widgets/payedBillsWidget.dart';
+import 'package:flutter_front_end/widgets/rawPayedBillWidget.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ReportsWidget extends StatefulWidget {
-  static const routeName = "/ReportsWidget";
+import '../wrapper.dart';
+
+class UserPaymentHistoryWidget extends StatefulWidget {
+  static const routeName = "/UserPaymentHistoryWidget";
 
   @override
-  _ReportsWidgetState createState() => _ReportsWidgetState();
+  _UserPaymentHistoryWidgetState createState() =>
+      _UserPaymentHistoryWidgetState();
 }
 
-class _ReportsWidgetState extends State<ReportsWidget> {
+class _UserPaymentHistoryWidgetState extends State<UserPaymentHistoryWidget> {
   final AuthService _auth = AuthService();
 
   int price = 0;
@@ -97,7 +110,7 @@ class _ReportsWidgetState extends State<ReportsWidget> {
     return Scaffold(
       backgroundColor: Color(0xFFC8A2C8),
       appBar: AppBar(
-        title: Text("Reports"),
+        title: Text("Resident Payments History"),
         backgroundColor: Color(0xFF852DCE),
         elevation: 0.0,
       ),
@@ -126,7 +139,7 @@ class _ReportsWidgetState extends State<ReportsWidget> {
 //                        print("Bills");
 //                        print(alreadyPayedBills);
                 documents.forEach((el) {
-                  if (el['verified']) {
+                  if (!el['verified']) {
                     visibleDocs.remove(el);
                   }
                 });
@@ -166,14 +179,6 @@ class _ReportsWidgetState extends State<ReportsWidget> {
                       .updateData({"verified": true});
                 }
 
-                Future<void> doNotVerifyPaidBills(String documentID) async {
-                  // Delete bill document from payedBills
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/payedbills')
-                      .document(documentID)
-                      .delete();
-                }
-
                 // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
                 return Padding(
                   padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
@@ -181,15 +186,27 @@ class _ReportsWidgetState extends State<ReportsWidget> {
                       shrinkWrap: true,
                       itemCount: visibleDocs.length,
                       itemBuilder: (ctx, index) => Container(
-                            child: PayedBillsWidget(
-                                visibleDocs[index].documentID,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 2, vertical: 10),
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Color(0xFF852DCE),
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0x99852DCE),
+                                  spreadRadius: 2,
+                                  blurRadius: 7, // changes position of shadow
+                                ),
+                              ],
+                            ),
+                            child: RawPayedBillWidget(
                                 visibleDocs[index]['amountPayed'].toString(),
                                 visibleDocs[index]['generationDate'],
                                 visibleDocs[index]['type'],
-                                visibleDocs[index]['payerName'],
-                                visibleDocs[index]['billID'],
-                                verifyPaidBills,
-                                doNotVerifyPaidBills),
+                                visibleDocs[index]['payerName']),
                           )),
                 );
               }),

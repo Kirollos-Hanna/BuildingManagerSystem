@@ -30,6 +30,8 @@ class _BillTableWidgetState extends State<BillTableWidget> {
   List<dynamic> payedBills = [];
   List<dynamic> alreadyPayedBills = [];
 
+  double billTotal = 0.0;
+
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
@@ -150,6 +152,14 @@ class _BillTableWidgetState extends State<BillTableWidget> {
 
                     if (userRole == "Business Owner") {
                       totalNumberOfResidents /= 2.0;
+                    }
+
+                    billTotal = 0;
+
+                    void updateBillTotal(double amount) {
+                      setState(() {
+                        billTotal += amount;
+                      });
                     }
 
                     return Padding(
