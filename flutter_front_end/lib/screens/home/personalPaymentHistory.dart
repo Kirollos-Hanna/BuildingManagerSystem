@@ -125,64 +125,66 @@ class _PersonalPaymentHistoryWidgetState extends State<PersonalPaymentHistoryWid
         elevation: 0.0,
       ),
       drawer: drawer,
-      body: Column(
-        children: <Widget>[
-          StreamBuilder(
-              stream: Firestore.instance
-                  .collection('bills/' + managerID + '/payedbills')
-                  .snapshots(),
-              builder: (ctx, streamSnapshot) {
-                print(streamSnapshot.connectionState);
-                if (streamSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: Loading(),
-                  );
-                }
-
-                final documents = streamSnapshot.data.documents;
-
-                print("Docs");
-                print(documents);
-
-                var visibleDocs = [...documents];
-
-                documents.forEach((el) {
-                  if (!el['verified'] || el['payerName'] != userName) {
-                    visibleDocs.remove(el);
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            StreamBuilder(
+                stream: Firestore.instance
+                    .collection('bills/' + managerID + '/payedbills')
+                    .snapshots(),
+                builder: (ctx, streamSnapshot) {
+                  print(streamSnapshot.connectionState);
+                  if (streamSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Loading(),
+                    );
                   }
-                });
 
-                // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: visibleDocs.length,
-                      itemBuilder: (ctx, index) => Container(
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 2, vertical: 10),
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color(0xFF852DCE),
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x99852DCE),
-                              spreadRadius: 2,
-                              blurRadius: 7, // changes position of shadow
+                  final documents = streamSnapshot.data.documents;
+
+                  print("Docs");
+                  print(documents);
+
+                  var visibleDocs = [...documents];
+
+                  documents.forEach((el) {
+                    if (!el['verified'] || el['payerName'] != userName) {
+                      visibleDocs.remove(el);
+                    }
+                  });
+
+                  // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: visibleDocs.length,
+                        itemBuilder: (ctx, index) => Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 2, vertical: 10),
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Color(0xFF852DCE),
                             ),
-                          ],
-                        ),
-                        child: RawBillWidget(
-                            visibleDocs[index]['amountPayed'].toString(),
-                            visibleDocs[index]['generationDate'],
-                            visibleDocs[index]['type']),
-                      )),
-                );
-              }),
-        ],
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x99852DCE),
+                                spreadRadius: 2,
+                                blurRadius: 7, // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: RawBillWidget(
+                              visibleDocs[index]['amountPayed'].toString(),
+                              visibleDocs[index]['generationDate'],
+                              visibleDocs[index]['type']),
+                        )),
+                  );
+                }),
+          ],
+        ),
       ),
     );
   }

@@ -115,102 +115,104 @@ class _UserPaymentHistoryWidgetState extends State<UserPaymentHistoryWidget> {
         elevation: 0.0,
       ),
       drawer: BuildingManagerWidget(),
-      body: Column(
-        children: <Widget>[
-          StreamBuilder(
-              stream: Firestore.instance
-                  .collection('bills/' + managerID + '/payedbills')
-                  .snapshots(),
-              builder: (ctx, streamSnapshot) {
-                print(streamSnapshot.connectionState);
-                if (streamSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: Loading(),
-                  );
-                }
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            StreamBuilder(
+                stream: Firestore.instance
+                    .collection('bills/' + managerID + '/payedbills')
+                    .snapshots(),
+                builder: (ctx, streamSnapshot) {
+                  print(streamSnapshot.connectionState);
+                  if (streamSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Loading(),
+                    );
+                  }
 
-                final documents = streamSnapshot.data.documents;
+                  final documents = streamSnapshot.data.documents;
 
-                print("Docs");
-                print(documents);
+                  print("Docs");
+                  print(documents);
 
-                var visibleDocs = [...documents];
+                  var visibleDocs = [...documents];
 
 //                        print("Bills");
 //                        print(alreadyPayedBills);
-                documents.forEach((el) {
-                  if (!el['verified']) {
-                    visibleDocs.remove(el);
-                  }
-                });
-
-                Future<void> verifyPaidBills(String documentID, String billID,
-                    String amountPayed) async {
-                  // if manager verifies the message, subtract amount payed from original bill
-                  double amountDifference = 0.0;
-                  double amountDue = 0.0;
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/bills')
-                      .document(billID)
-                      .get()
-                      .then((value) {
-                    amountDue = value['amountDue'].toDouble();
-                    amountDifference =
-                        value['amountPaid'] + double.parse(amountPayed);
+                  documents.forEach((el) {
+                    if (!el['verified']) {
+                      visibleDocs.remove(el);
+                    }
                   });
 
-                  // if amountDue of a bill = 0, then it's status becomes = paid
-                  if (amountDifference >= amountDue) {
+                  Future<void> verifyPaidBills(String documentID, String billID,
+                      String amountPayed) async {
+                    // if manager verifies the message, subtract amount payed from original bill
+                    double amountDifference = 0.0;
+                    double amountDue = 0.0;
                     await Firestore.instance
                         .collection('bills/' + managerID + '/bills')
                         .document(billID)
-                        .updateData(
-                            {'amountPaid': amountDifference, 'status': "paid"});
-                  } else {
+                        .get()
+                        .then((value) {
+                      amountDue = value['amountDue'].toDouble();
+                      amountDifference =
+                          value['amountPaid'] + double.parse(amountPayed);
+                    });
+
+                    // if amountDue of a bill = 0, then it's status becomes = paid
+                    if (amountDifference >= amountDue) {
+                      await Firestore.instance
+                          .collection('bills/' + managerID + '/bills')
+                          .document(billID)
+                          .updateData(
+                              {'amountPaid': amountDifference, 'status': "paid"});
+                    } else {
+                      await Firestore.instance
+                          .collection('bills/' + managerID + '/bills')
+                          .document(billID)
+                          .updateData({'amountPaid': amountDifference});
+                    }
+
                     await Firestore.instance
-                        .collection('bills/' + managerID + '/bills')
-                        .document(billID)
-                        .updateData({'amountPaid': amountDifference});
+                        .collection('bills/' + managerID + '/payedbills')
+                        .document(documentID)
+                        .updateData({"verified": true});
                   }
 
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/payedbills')
-                      .document(documentID)
-                      .updateData({"verified": true});
-                }
-
-                // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: visibleDocs.length,
-                      itemBuilder: (ctx, index) => Container(
-                            margin: EdgeInsets.symmetric(
-                                horizontal: 2, vertical: 10),
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Color(0xFF852DCE),
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color(0x99852DCE),
-                                  spreadRadius: 2,
-                                  blurRadius: 7, // changes position of shadow
+                  // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: visibleDocs.length,
+                        itemBuilder: (ctx, index) => Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 2, vertical: 10),
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Color(0xFF852DCE),
                                 ),
-                              ],
-                            ),
-                            child: RawPayedBillWidget(
-                                visibleDocs[index]['amountPayed'].toString(),
-                                visibleDocs[index]['generationDate'],
-                                visibleDocs[index]['type'],
-                                visibleDocs[index]['payerName']),
-                          )),
-                );
-              }),
-        ],
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0x99852DCE),
+                                    spreadRadius: 2,
+                                    blurRadius: 7, // changes position of shadow
+                                  ),
+                                ],
+                              ),
+                              child: RawPayedBillWidget(
+                                  visibleDocs[index]['amountPayed'].toString(),
+                                  visibleDocs[index]['generationDate'],
+                                  visibleDocs[index]['type'],
+                                  visibleDocs[index]['payerName']),
+                            )),
+                  );
+                }),
+          ],
+        ),
       ),
     );
   }

@@ -102,98 +102,100 @@ class _ReportsWidgetState extends State<ReportsWidget> {
         elevation: 0.0,
       ),
       drawer: BuildingManagerWidget(),
-      body: Column(
-        children: <Widget>[
-          StreamBuilder(
-              stream: Firestore.instance
-                  .collection('bills/' + managerID + '/payedbills')
-                  .snapshots(),
-              builder: (ctx, streamSnapshot) {
-                print(streamSnapshot.connectionState);
-                if (streamSnapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: Loading(),
-                  );
-                }
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            StreamBuilder(
+                stream: Firestore.instance
+                    .collection('bills/' + managerID + '/payedbills')
+                    .snapshots(),
+                builder: (ctx, streamSnapshot) {
+                  print(streamSnapshot.connectionState);
+                  if (streamSnapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: Loading(),
+                    );
+                  }
 
-                final documents = streamSnapshot.data.documents;
+                  final documents = streamSnapshot.data.documents;
 
-                print("Docs");
-                print(documents);
+                  print("Docs");
+                  print(documents);
 
-                var visibleDocs = [...documents];
+                  var visibleDocs = [...documents];
 
 //                        print("Bills");
 //                        print(alreadyPayedBills);
-                documents.forEach((el) {
-                  if (el['verified']) {
-                    visibleDocs.remove(el);
-                  }
-                });
-
-                Future<void> verifyPaidBills(String documentID, String billID,
-                    String amountPayed) async {
-                  // if manager verifies the message, subtract amount payed from original bill
-                  double amountDifference = 0.0;
-                  double amountDue = 0.0;
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/bills')
-                      .document(billID)
-                      .get()
-                      .then((value) {
-                    amountDue = value['amountDue'].toDouble();
-                    amountDifference =
-                        value['amountPaid'] + double.parse(amountPayed);
+                  documents.forEach((el) {
+                    if (el['verified']) {
+                      visibleDocs.remove(el);
+                    }
                   });
 
-                  // if amountDue of a bill = 0, then it's status becomes = paid
-                  if (amountDifference >= amountDue) {
+                  Future<void> verifyPaidBills(String documentID, String billID,
+                      String amountPayed) async {
+                    // if manager verifies the message, subtract amount payed from original bill
+                    double amountDifference = 0.0;
+                    double amountDue = 0.0;
                     await Firestore.instance
                         .collection('bills/' + managerID + '/bills')
                         .document(billID)
-                        .updateData(
-                            {'amountPaid': amountDifference, 'status': "paid"});
-                  } else {
+                        .get()
+                        .then((value) {
+                      amountDue = value['amountDue'].toDouble();
+                      amountDifference =
+                          value['amountPaid'] + double.parse(amountPayed);
+                    });
+
+                    // if amountDue of a bill = 0, then it's status becomes = paid
+                    if (amountDifference >= amountDue) {
+                      await Firestore.instance
+                          .collection('bills/' + managerID + '/bills')
+                          .document(billID)
+                          .updateData(
+                              {'amountPaid': amountDifference, 'status': "paid"});
+                    } else {
+                      await Firestore.instance
+                          .collection('bills/' + managerID + '/bills')
+                          .document(billID)
+                          .updateData({'amountPaid': amountDifference});
+                    }
+
                     await Firestore.instance
-                        .collection('bills/' + managerID + '/bills')
-                        .document(billID)
-                        .updateData({'amountPaid': amountDifference});
+                        .collection('bills/' + managerID + '/payedbills')
+                        .document(documentID)
+                        .updateData({"verified": true});
                   }
 
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/payedbills')
-                      .document(documentID)
-                      .updateData({"verified": true});
-                }
+                  Future<void> doNotVerifyPaidBills(String documentID) async {
+                    // Delete bill document from payedBills
+                    await Firestore.instance
+                        .collection('bills/' + managerID + '/payedbills')
+                        .document(documentID)
+                        .delete();
+                  }
 
-                Future<void> doNotVerifyPaidBills(String documentID) async {
-                  // Delete bill document from payedBills
-                  await Firestore.instance
-                      .collection('bills/' + managerID + '/payedbills')
-                      .document(documentID)
-                      .delete();
-                }
-
-                // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: visibleDocs.length,
-                      itemBuilder: (ctx, index) => Container(
-                            child: PayedBillsWidget(
-                                visibleDocs[index].documentID,
-                                visibleDocs[index]['amountPayed'].toString(),
-                                visibleDocs[index]['generationDate'],
-                                visibleDocs[index]['type'],
-                                visibleDocs[index]['payerName'],
-                                visibleDocs[index]['billID'],
-                                verifyPaidBills,
-                                doNotVerifyPaidBills),
-                          )),
-                );
-              }),
-        ],
+                  // TODO manager should receive a message that says "{Name} has payed {Amount} of {Type} bill"
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 0, horizontal: 50),
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: visibleDocs.length,
+                        itemBuilder: (ctx, index) => Container(
+                              child: PayedBillsWidget(
+                                  visibleDocs[index].documentID,
+                                  visibleDocs[index]['amountPayed'].toString(),
+                                  visibleDocs[index]['generationDate'],
+                                  visibleDocs[index]['type'],
+                                  visibleDocs[index]['payerName'],
+                                  visibleDocs[index]['billID'],
+                                  verifyPaidBills,
+                                  doNotVerifyPaidBills),
+                            )),
+                  );
+                }),
+          ],
+        ),
       ),
     );
   }
