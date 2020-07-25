@@ -26,6 +26,7 @@ class _ResidentHomeState extends State<ResidentHome> {
   bool asyncDone = false;
   String userName = "";
   String pricePaidNotification = "";
+  int businessOwnerTax = 1;
   double totalNumberOfResidents = 1;
   String userRole = "";
 
@@ -34,7 +35,6 @@ class _ResidentHomeState extends State<ResidentHome> {
 
   double billTotal = 0;
   bool hasManager = false;
-
 
   @override
   Future<void> didChangeDependencies() async {
@@ -126,6 +126,13 @@ class _ResidentHomeState extends State<ResidentHome> {
           });
         }
       });
+      if(userRole == "Business Owner"){
+        setState(() {
+          billTotal *= 2;
+          totalNumberOfResidents /= 2.0;
+//          businessOwnerTax = 2;
+        });
+      }
     });
   }
 
@@ -222,10 +229,6 @@ class _ResidentHomeState extends State<ResidentHome> {
                                   }
                                 }
 
-                                if (userRole == "Business Owner") {
-                                  totalNumberOfResidents /= 2.0;
-                                }
-
                                 return Padding(
                                   padding: EdgeInsets.symmetric(
                                       vertical: 0, horizontal: 50),
@@ -236,7 +239,7 @@ class _ResidentHomeState extends State<ResidentHome> {
                                             child: BillWidget(
                                                 visibleDocs[index].documentID,
                                                 (visibleDocs[index]
-                                                            ['amountDue'] /
+                                                            ['amountDue'] * businessOwnerTax /
                                                         totalNumberOfResidents)
                                                     .toStringAsFixed(2),
                                                 visibleDocs[index]['status'],
@@ -286,6 +289,7 @@ class _ResidentHomeState extends State<ResidentHome> {
                                 print(payedBills);
                                 payedBills.forEach((element) {
                                   alreadyPayedBills.add(element[4]);
+                                  print(double.parse(element[3]));
                                   billTotal -= double.parse(element[3]);
                                 });
                                 payedBills = [];

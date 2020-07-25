@@ -13,7 +13,7 @@ class BillForm extends StatefulWidget {
 
 class _BillFormState extends State<BillForm> {
   int price = 0;
-  String billType = "";
+  String billType = "Water";
   int residentsNumber = 0;
   int businessOwnersNumber = 0;
   String dropdownString = "Water";

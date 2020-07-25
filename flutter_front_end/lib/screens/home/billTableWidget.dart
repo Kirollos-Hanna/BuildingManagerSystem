@@ -95,6 +95,21 @@ class _BillTableWidgetState extends State<BillTableWidget> {
         }
       });
     });
+
+    billTotal = 0;
+    await Firestore.instance
+        .collection('bills/' + managerID + '/bills')
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((el) {
+        // if el.documentID is in documents, remove it from visibleDocs
+        if (!alreadyPayedBills.contains(el.documentID)) {
+          setState(() {
+            billTotal += el['amountDue'] / totalNumberOfResidents;
+          });
+        }
+      });
+    });
   }
 
   @override
@@ -154,8 +169,6 @@ class _BillTableWidgetState extends State<BillTableWidget> {
                       totalNumberOfResidents /= 2.0;
                     }
 
-                    billTotal = 0;
-
                     void updateBillTotal(double amount) {
                       setState(() {
                         billTotal += amount;
@@ -181,6 +194,16 @@ class _BillTableWidgetState extends State<BillTableWidget> {
                               )),
                     );
                   }),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 50),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text("Total Bill"),
+                    Text("total: " + billTotal.toStringAsFixed(2)),
+                  ],
+                ),
+              ),
               Text(pricePaidNotification),
               RaisedButton(
                 color: Color(0xFF852DCE),
